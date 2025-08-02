@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">Aerp Clicker</string>
+    <string name="get_aerps_text">Bekomme Aerps!</string>
+    <string name="duplicate_aerps_label">Doppelte Aerps</string> <!-- Für den App-Titel in der Manifest-Datei und ggf. anderswo -->
+
+    <!-- UI.kt - AerpClickerApp -->
+    <string name="top_bar_title">Aerp Clicker</string>
+    <string name="menu_content_description">Menü öffnen</string>
+
+    <!-- UI.kt - GameScreen -->
+    <string name="score_text">Aerps: %1$d</string> <!-- Prefix für den Punktestand -->
+    <string name="click_me_button">Bekomme Aerps!</string>
+    <string name="cooldown_auto_clicker_prefix">Auto-Klicker:</string>
+    <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik:</string>
+    <string name="cooldown_suffix">s</string> <!-- Suffix für Sekunden -->
+
+    <!-- UI.kt - ShopMenu -->
+    <string name="shop_title">Verbesserungen</string>
+    <string name="shop_item_double_aerps">Doppelte Aerps</string>
+    <string name="shop_item_auto_aerper">Auto-Aerper (Alle 10 Sek.)</string>
+    <string name="shop_item_aerp_factory">Aerp-Fabrik (+5 alle 10 Sek.)</string>
+    <string name="shop_item_aerp_factory_description_active">Produziert 5 Aerps alle 10 Sek.
+    </string>
+
+    <!-- UI.kt - ShopItem -->
+    <string name="shop_item_cost_prefix">Kosten:</string>
+    <string name="shop_item_cost_suffix">Aerps</string>
+    <string name="shop_item_multiplier_prefix">Aktueller Multiplikator: x</string>
+    <string name="shop_item_status_active">Aktiv</string>
+    <string name="shop_item_status_inactive">Inaktiv</string>
+    <string name="shop_item_buy_button">Kaufen</string>
+    <string name="shop_item_bought_button">Gekauft</string>
 </resources>

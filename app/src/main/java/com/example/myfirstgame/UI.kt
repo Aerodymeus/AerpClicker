@@ -26,11 +26,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration // Import für LocalConfiguration
-import androidx.compose.ui.tooling.preview.Preview
+//import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource // Import für stringResource
+import androidx.compose.ui.tooling.preview.Preview // Import für Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+
 
 
 class UI : ComponentActivity() {
@@ -59,7 +62,7 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Aerp Clicker") },
+                    title = { Text(stringResource(id = R.string.top_bar_title)) },
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
@@ -68,7 +71,7 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
                                 }
                             }
                         }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menü öffnen")
+                            Icon(Icons.Filled.Menu, contentDescription = stringResource(id = R.string.menu_content_description))
                         }
                     }
                 )
@@ -94,8 +97,8 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             modifier = Modifier.fillMaxHeight() // Füllt die Höhe des ihm zugewiesenen Raums
         ) {
             Text(
-                text = "Aerps: ${gameViewModel.score}",
-                fontSize = 32.sp,
+                text = stringResource(id = R.string.score_text, gameViewModel.score),
+                fontSize = 32.sp, // Keep only one fontSize
                 modifier = Modifier.padding(bottom = 32.dp)
             )
 
@@ -103,7 +106,10 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                 onClick = { gameViewModel.onCookieClicked() },
                 modifier = Modifier.size(200.dp)
             ) {
-                Text("Bekomme Aerps!", fontSize = 24.sp)
+                Text(
+                    text = stringResource(id = R.string.click_me_button),
+                    fontSize = 24.sp
+                )
             }
         }
     }
@@ -117,14 +123,18 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         ) {
             if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
                 Text(
-                    text = "Auto-Klicker: ${gameViewModel.autoClickerCooldown}s",
+                    text = stringResource(id = R.string.cooldown_auto_clicker_prefix) +
+                            "${gameViewModel.autoClickerCooldown}" +
+                            stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
             if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
                 Text(
-                    text = "Aerp-Fabrik: ${gameViewModel.passiveGeneratorCooldown}s",
+                    text = stringResource(id = R.string.cooldown_aerp_factory_prefix) +
+                            "${gameViewModel.passiveGeneratorCooldown}" +
+                            stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp
                 )
             }
@@ -182,8 +192,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
 
 @Composable
 fun ShopMenu(gameViewModel: GameViewModel) {
-    // Definieren einer Datenstruktur für die Shop-Items, um die Verwendung mit LazyColumn zu erleichtern.
-    // Dies ist optional, kann aber helfen, den Code sauberer zu halten, wenn du viele Items hast.
+    //val context = LocalContext.current
     data class ShopItemData(
         val name: String,
         val cost: Int,
@@ -196,42 +205,41 @@ fun ShopMenu(gameViewModel: GameViewModel) {
 
     val shopItemsList = listOf(
         ShopItemData(
-            name = "Doppelte Aerps",
+            name = stringResource(id = R.string.shop_item_double_aerps),
             cost = gameViewModel.doubleClickCost,
             currentMultiplier = gameViewModel.clickMultiplier,
             onBuy = { gameViewModel.buyDoubleClickUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.doubleClickCost
         ),
         ShopItemData(
-            name = "Auto-Klicker (Alle 10 Sek.)",
+            name = stringResource(id = R.string.shop_item_auto_aerper),
             cost = gameViewModel.autoClickerCost,
             isActive = gameViewModel.isAutoClickerActive,
             onBuy = { gameViewModel.buyAutoClickerUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive
         ),
         ShopItemData(
-            name = "Aerp-Fabrik (+5 alle 10 Sek.)",
+            name = stringResource(id = R.string.shop_item_aerp_factory),
             cost = gameViewModel.passiveScoreGeneratorCost,
             isActive = gameViewModel.isPassiveScoreGeneratorActive,
             onBuy = { gameViewModel.buyPassiveScoreGenerator() },
             canAfford = gameViewModel.score >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
-            description = if (gameViewModel.isPassiveScoreGeneratorActive) "Produziert 5 Cookies alle 10 Sek." else null
+            description = if (gameViewModel.isPassiveScoreGeneratorActive) stringResource(id = R.string.shop_item_aerp_factory_description_active) else null
         )
-        // Füge hier weitere ShopItemData-Objekte für neue Items hinzu
     )
 
     Column(
         modifier = Modifier
-            .fillMaxSize() // LazyColumn sollte die verfügbare Höhe ausfüllen
+            .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text("Verbesserungen", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+        Text(stringResource(id = R.string.shop_title), fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
 
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(), // LazyColumn füllt die Breite aus
-            verticalArrangement = Arrangement.spacedBy(16.dp) // Abstand zwischen den Items
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(shopItemsList) { itemData -> // Iteriere über die Liste der ShopItemData
+            items(shopItemsList) { itemData ->
                 ShopItem(
                     name = itemData.name,
                     cost = itemData.cost,
@@ -246,6 +254,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
     }
 }
 
+
 @Composable
 fun ShopItem(
     name: String,
@@ -254,26 +263,41 @@ fun ShopItem(
     canAfford: Boolean,
     currentMultiplier: Int? = null,
     isActive: Boolean? = null,
-    description: String? = null // Optionaler Parameter für zusätzliche Beschreibung
+    description: String? = null
 ) {
     Column {
-        Text(name, fontSize = 18.sp)
-        Text("Kosten: $cost Aerps", fontSize = 14.sp)
+        Text(name, fontSize = 18.sp) // Name kommt bereits als String-Ressource aus ShopMenu
+        Text(
+            stringResource(id = R.string.shop_item_cost_prefix) +
+                    "$cost" +
+                    stringResource(id = R.string.shop_item_cost_suffix),
+            fontSize = 14.sp
+        )
         if (currentMultiplier != null) {
-            Text("Aktueller Multiplikator: x$currentMultiplier", fontSize = 14.sp)
+            Text(
+                stringResource(id = R.string.shop_item_multiplier_prefix) + "$currentMultiplier",
+                fontSize = 14.sp
+            )
         }
         if (isActive != null) {
-            Text(if (isActive) "Aktiv" else "Inaktiv", fontSize = 14.sp)
+            Text(
+                if (isActive) stringResource(id = R.string.shop_item_status_active)
+                else stringResource(id = R.string.shop_item_status_inactive),
+                fontSize = 14.sp
+            )
         }
-        if (description != null) { // Zeige die Beschreibung an, wenn vorhanden
-            Text(description, fontSize = 14.sp)
+        if (description != null) {
+            Text(description, fontSize = 14.sp) // Beschreibung kommt bereits als String-Ressource aus ShopMenu
         }
         Button(
             onClick = onBuy,
             enabled = canAfford,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (isActive == true) "Gekauft" else "Kaufen")
+            Text(
+                if (isActive == true) stringResource(id = R.string.shop_item_bought_button)
+                else stringResource(id = R.string.shop_item_buy_button)
+            )
         }
     }
 }
