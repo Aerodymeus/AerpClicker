@@ -91,9 +91,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxHeight() // This is fine
-            // .weight(1f) // REMOVE THIS LINE
+            modifier = Modifier.fillMaxHeight() // Füllt die Höhe des ihm zugewiesenen Raums
         ) {
             Text(
                 text = "Cookies: ${gameViewModel.score}",
@@ -110,13 +108,12 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         }
     }
 
-    // Cooldown-Anzeigen
     val cooldownsContent = @Composable {
         Column(
             modifier = Modifier
-                .padding(16.dp), // Padding für die Cooldowns, egal wo sie sind
-            horizontalAlignment = if (isLandscape) Alignment.End else Alignment.CenterHorizontally,
-            verticalArrangement = if (isLandscape) Arrangement.Top else Arrangement.Bottom
+                .padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 16.dp), // Padding für die Cooldowns
+            horizontalAlignment = Alignment.End, // Rechtsbündig
+            verticalArrangement = Arrangement.Top // Oben in ihrem Bereich
         ) {
             if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
                 Text(
@@ -138,15 +135,25 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         Row(
             modifier = modifier
                 .fillMaxSize()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 8.dp), // Etwas horizontales Padding für die gesamte Reihe
+            verticalAlignment = Alignment.CenterVertically // Vertikal zentrieren in der Reihe
         ) {
-            // The Box containing mainContent has the weight, which is correct.
-            Box(modifier = Modifier.weight(1f)) {
+            // Box für den Hauptinhalt (Zähler und Button)
+            // Diese Box wird durch die Spacer zentriert.
+            Box(
+                modifier = Modifier.weight(1f), // Nimmt den zentralen, flexiblen Bereich ein
+                contentAlignment = Alignment.Center // Zentriert den Inhalt der Box (also mainContent)
+            ) {
                 mainContent()
             }
-            Spacer(modifier = Modifier.width(16.dp))
-            Box(modifier = Modifier.weight(0.3f)) {
+
+            // Box für die Cooldowns auf der rechten Seite
+            // Nimmt eine feste oder proportionale Breite ein, je nach Bedarf.
+            // Hier verwenden wir keine weight, damit es sich an seinen Inhalt anpasst oder eine feste Breite hat.
+            Box(
+                modifier = Modifier.wrapContentWidth(Alignment.End) // Passt sich der Breite des Inhalts an und ist rechtsbündig
+                // Alternativ eine feste Breite: .width(150.dp) oder .requiredWidth(150.dp)
+            ) {
                 cooldownsContent()
             }
         }
@@ -155,14 +162,19 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // The Box containing mainContent has the weight, which is correct.
-            Box(modifier = Modifier.weight(1f)) {
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.Center // Zentriert mainContent
+            ) {
                 mainContent()
             }
-            cooldownsContent()
+            // Cooldowns unten im Portrait-Modus
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                // Die innere Column von cooldownsContent wird sich basierend auf isLandscape ausrichten
+                cooldownsContent()
+            }
         }
     }
 }
