@@ -103,7 +103,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                 onClick = { gameViewModel.onCookieClicked() },
                 modifier = Modifier.size(200.dp)
             ) {
-                Text("Klick mich!", fontSize = 24.sp)
+                Text("Bekomme Kekse!", fontSize = 24.sp)
             }
         }
     }
