@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn // Import für LazyColumn
+import androidx.compose.foundation.lazy.items // Import für die items Erweiterungsfunktion
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -128,6 +130,18 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             onBuy = { gameViewModel.buyAutoClickerUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive
         )
+
+        Spacer(modifier = Modifier.height(16.dp)) // Abstandshalter für das neue Item
+
+        // Neues Shop-Item für den passiven Score Generator
+        ShopItem(
+            name = "Cookie-Fabrik (+5 alle 10 Sek.)", // Name des neuen Items
+            cost = gameViewModel.passiveScoreGeneratorCost,
+            isActive = gameViewModel.isPassiveScoreGeneratorActive,
+            onBuy = { gameViewModel.buyPassiveScoreGenerator() },
+            canAfford = gameViewModel.score >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
+            description = if (gameViewModel.isPassiveScoreGeneratorActive) "Produziert 5 Cookies alle 10 Sek." else null
+        )
     }
 }
 
@@ -137,8 +151,9 @@ fun ShopItem(
     cost: Int,
     onBuy: () -> Unit,
     canAfford: Boolean,
-    currentMultiplier: Int? = null, // Optional für den Multiplikator-Text
-    isActive: Boolean? = null // Optional für den Auto-Klicker Status
+    currentMultiplier: Int? = null,
+    isActive: Boolean? = null,
+    description: String? = null // Optionaler Parameter für zusätzliche Beschreibung
 ) {
     Column {
         Text(name, fontSize = 18.sp)
@@ -148,6 +163,9 @@ fun ShopItem(
         }
         if (isActive != null) {
             Text(if (isActive) "Aktiv" else "Inaktiv", fontSize = 14.sp)
+        }
+        if (description != null) { // Zeige die Beschreibung an, wenn vorhanden
+            Text(description, fontSize = 14.sp)
         }
         Button(
             onClick = onBuy,
