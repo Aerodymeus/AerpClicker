@@ -1,12 +1,12 @@
 package com.example.myfirstgame
 
+import android.content.res.Configuration // Import für Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn // Import für LazyColumn
-import androidx.compose.foundation.lazy.items // Import für die items Erweiterungsfunktion
-import androidx.compose.material.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
@@ -25,11 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration // Import für LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+
 
 class UI : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,66 +84,153 @@ fun CookieClickerApp(gameViewModel: GameViewModel = viewModel()) {
 
 @Composable
 fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Cookies: ${gameViewModel.score}",
-            fontSize = 32.sp,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        Button(
-            onClick = { gameViewModel.onCookieClicked() },
-            modifier = Modifier.size(200.dp) // Größe des Klick-Buttons
+    val mainContent = @Composable {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxHeight() // This is fine
+            // .weight(1f) // REMOVE THIS LINE
         ) {
-            Text("Klick mich!", fontSize = 24.sp)
+            Text(
+                text = "Cookies: ${gameViewModel.score}",
+                fontSize = 32.sp,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            Button(
+                onClick = { gameViewModel.onCookieClicked() },
+                modifier = Modifier.size(200.dp)
+            ) {
+                Text("Klick mich!", fontSize = 24.sp)
+            }
+        }
+    }
+
+    // Cooldown-Anzeigen
+    val cooldownsContent = @Composable {
+        Column(
+            modifier = Modifier
+                .padding(16.dp), // Padding für die Cooldowns, egal wo sie sind
+            horizontalAlignment = if (isLandscape) Alignment.End else Alignment.CenterHorizontally,
+            verticalArrangement = if (isLandscape) Arrangement.Top else Arrangement.Bottom
+        ) {
+            if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
+                Text(
+                    text = "Auto-Klicker: ${gameViewModel.autoClickerCooldown}s",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+            if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
+                Text(
+                    text = "Cookie-Fabrik: ${gameViewModel.passiveGeneratorCooldown}s",
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+
+    if (isLandscape) {
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // The Box containing mainContent has the weight, which is correct.
+            Box(modifier = Modifier.weight(1f)) {
+                mainContent()
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Box(modifier = Modifier.weight(0.3f)) {
+                cooldownsContent()
+            }
+        }
+    } else { // Portrait-Modus
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // The Box containing mainContent has the weight, which is correct.
+            Box(modifier = Modifier.weight(1f)) {
+                mainContent()
+            }
+            cooldownsContent()
         }
     }
 }
 
+
 @Composable
 fun ShopMenu(gameViewModel: GameViewModel) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text("Shop", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+    // Definieren einer Datenstruktur für die Shop-Items, um die Verwendung mit LazyColumn zu erleichtern.
+    // Dies ist optional, kann aber helfen, den Code sauberer zu halten, wenn du viele Items hast.
+    data class ShopItemData(
+        val name: String,
+        val cost: Int,
+        val onBuy: () -> Unit,
+        val canAfford: Boolean,
+        val currentMultiplier: Int? = null,
+        val isActive: Boolean? = null,
+        val description: String? = null
+    )
 
-        ShopItem(
+    val shopItemsList = listOf(
+        ShopItemData(
             name = "Doppelte Klicks",
             cost = gameViewModel.doubleClickCost,
             currentMultiplier = gameViewModel.clickMultiplier,
             onBuy = { gameViewModel.buyDoubleClickUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.doubleClickCost
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ShopItem(
+        ),
+        ShopItemData(
             name = "Auto-Klicker (Alle 10 Sek.)",
             cost = gameViewModel.autoClickerCost,
             isActive = gameViewModel.isAutoClickerActive,
             onBuy = { gameViewModel.buyAutoClickerUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive
-        )
-
-        Spacer(modifier = Modifier.height(16.dp)) // Abstandshalter für das neue Item
-
-        // Neues Shop-Item für den passiven Score Generator
-        ShopItem(
-            name = "Cookie-Fabrik (+5 alle 10 Sek.)", // Name des neuen Items
+        ),
+        ShopItemData(
+            name = "Cookie-Fabrik (+5 alle 10 Sek.)",
             cost = gameViewModel.passiveScoreGeneratorCost,
             isActive = gameViewModel.isPassiveScoreGeneratorActive,
             onBuy = { gameViewModel.buyPassiveScoreGenerator() },
             canAfford = gameViewModel.score >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
             description = if (gameViewModel.isPassiveScoreGeneratorActive) "Produziert 5 Cookies alle 10 Sek." else null
         )
+        // Füge hier weitere ShopItemData-Objekte für neue Items hinzu
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize() // LazyColumn sollte die verfügbare Höhe ausfüllen
+            .padding(16.dp)
+    ) {
+        Text("Shop", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(), // LazyColumn füllt die Breite aus
+            verticalArrangement = Arrangement.spacedBy(16.dp) // Abstand zwischen den Items
+        ) {
+            items(shopItemsList) { itemData -> // Iteriere über die Liste der ShopItemData
+                ShopItem(
+                    name = itemData.name,
+                    cost = itemData.cost,
+                    onBuy = itemData.onBuy,
+                    canAfford = itemData.canAfford,
+                    currentMultiplier = itemData.currentMultiplier,
+                    isActive = itemData.isActive,
+                    description = itemData.description
+                )
+            }
+        }
     }
 }
 
@@ -177,11 +266,18 @@ fun ShopItem(
     }
 }
 
-
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Portrait Preview")
 @Composable
-fun DefaultPreview() {
+fun DefaultPreviewPortrait() {
     MaterialTheme {
         CookieClickerApp()
+    }
+}
+
+@Preview(showBackground = true, device = "spec:width=640dp,height=360dp,dpi=480", name = "Landscape Preview")
+@Composable
+fun DefaultPreviewLandscape() {
+    MaterialTheme {
+        CookieClickerApp() // Hier könntest du einen Test-ViewModel mit aktiven Cooldowns injecten für eine bessere Preview
     }
 }
