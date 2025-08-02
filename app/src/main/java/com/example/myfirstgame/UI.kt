@@ -37,14 +37,14 @@ class UI : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CookieClickerApp()
+            AerpClickerApp()
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CookieClickerApp(gameViewModel: GameViewModel = viewModel()) {
+fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -59,7 +59,7 @@ fun CookieClickerApp(gameViewModel: GameViewModel = viewModel()) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Cookie Clicker") },
+                    title = { Text("Aerp Clicker") },
                     navigationIcon = {
                         IconButton(onClick = {
                             scope.launch {
@@ -94,7 +94,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             modifier = Modifier.fillMaxHeight() // Füllt die Höhe des ihm zugewiesenen Raums
         ) {
             Text(
-                text = "Cookies: ${gameViewModel.score}",
+                text = "Aerps: ${gameViewModel.score}",
                 fontSize = 32.sp,
                 modifier = Modifier.padding(bottom = 32.dp)
             )
@@ -103,7 +103,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                 onClick = { gameViewModel.onCookieClicked() },
                 modifier = Modifier.size(200.dp)
             ) {
-                Text("Bekomme Kekse!", fontSize = 24.sp)
+                Text("Bekomme Aerps!", fontSize = 24.sp)
             }
         }
     }
@@ -124,7 +124,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             }
             if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
                 Text(
-                    text = "Cookie-Fabrik: ${gameViewModel.passiveGeneratorCooldown}s",
+                    text = "Aerp-Fabrik: ${gameViewModel.passiveGeneratorCooldown}s",
                     fontSize = 16.sp
                 )
             }
@@ -196,7 +196,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
 
     val shopItemsList = listOf(
         ShopItemData(
-            name = "Doppelte Klicks",
+            name = "Doppelte Aerps",
             cost = gameViewModel.doubleClickCost,
             currentMultiplier = gameViewModel.clickMultiplier,
             onBuy = { gameViewModel.buyDoubleClickUpgrade() },
@@ -210,7 +210,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive
         ),
         ShopItemData(
-            name = "Cookie-Fabrik (+5 alle 10 Sek.)",
+            name = "Aerp-Fabrik (+5 alle 10 Sek.)",
             cost = gameViewModel.passiveScoreGeneratorCost,
             isActive = gameViewModel.isPassiveScoreGeneratorActive,
             onBuy = { gameViewModel.buyPassiveScoreGenerator() },
@@ -225,7 +225,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             .fillMaxSize() // LazyColumn sollte die verfügbare Höhe ausfüllen
             .padding(16.dp)
     ) {
-        Text("Shop", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
+        Text("Verbesserungen", fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(), // LazyColumn füllt die Breite aus
@@ -258,7 +258,7 @@ fun ShopItem(
 ) {
     Column {
         Text(name, fontSize = 18.sp)
-        Text("Kosten: $cost Cookies", fontSize = 14.sp)
+        Text("Kosten: $cost Aerps", fontSize = 14.sp)
         if (currentMultiplier != null) {
             Text("Aktueller Multiplikator: x$currentMultiplier", fontSize = 14.sp)
         }
@@ -282,7 +282,7 @@ fun ShopItem(
 @Composable
 fun DefaultPreviewPortrait() {
     MaterialTheme {
-        CookieClickerApp()
+        AerpClickerApp()
     }
 }
 
@@ -290,6 +290,6 @@ fun DefaultPreviewPortrait() {
 @Composable
 fun DefaultPreviewLandscape() {
     MaterialTheme {
-        CookieClickerApp() // Hier könntest du einen Test-ViewModel mit aktiven Cooldowns injecten für eine bessere Preview
+        AerpClickerApp() // Hier könntest du einen Test-ViewModel mit aktiven Cooldowns injecten für eine bessere Preview
     }
 }
