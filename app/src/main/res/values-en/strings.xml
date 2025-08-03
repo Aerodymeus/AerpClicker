@@ -52,4 +52,9 @@
         <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
         <string name="shop_item_auto_aerper_description">Automatically clicks for you every %1$d seconds.</string>
     <string name="shop_item_upgrade_button">Upgrade</string>
+
+        <!-- For the Click Upgrade (previously "Double Aerps") -->
+        <string name="shop_item_click_boost">Aerp Booster</string> <!-- NEW NAME -->
+        <string name="shop_item_click_boost_description">Increases Aerps per click by 20%.</string> <!-- NEW DESCRIPTION -->
+
 </resources>

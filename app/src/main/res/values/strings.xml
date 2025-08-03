@@ -57,7 +57,19 @@
     <!-- NEUE STRINGS FÜR MEHRFACHEN KAUF -->
     <string name="shop_item_level_prefix" translatable="false">Level: </string>
     <string name="shop_item_upgrade_button">Verbessern</string>
+    <!-- ... andere Strings ... -->
+
+    <!-- Für das Klick-Upgrade (vorher "Doppelte Aerps") -->
+    <string name="shop_item_click_boost">Aerp-Verstärker</string> <!-- NEUER NAME -->
+    <string name="shop_item_click_boost_description">Erhöht die Aerps pro Klick um 20%.</string>
 
 
 
+
+    <!-- ... other strings ... -->
+
+    <!-- For the Click Upgrade (previously "Double Aerps") -->
+    <!-- <string name="shop_item_click_boost">Click Booster</string> -->
+ <!-- NEW NAME -->
+    <!-- <string name="shop_item_click_boost_description">Increases Aerps per click by 20%.</string> -->
 </resources>

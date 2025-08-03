@@ -9,22 +9,24 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 class GameViewModel : ViewModel() {
     // UI State
     var score by mutableIntStateOf(0) // Empfehlung: Int statt State<Int> für einfache Zahlentypen
         private set
-    var clickMultiplier by mutableIntStateOf(1)
+    var clickMultiplier by mutableStateOf(1.0) // Startwert als Double
         private set
-    var doubleClickCost by mutableIntStateOf(50)
+    var clickBoostCost by mutableIntStateOf(50) // Umbenannt von doubleClickCost
         private set
-    // NEU: Level-Zähler für das Klick-Upgrade
-    var doubleClickLevel by mutableIntStateOf(0)
+    var clickBoostLevel by mutableIntStateOf(0) // Umbenannt von doubleClickLevel
         private set
+    private val baseClickValue = 1 // Der Grundwert für einen Klick, bevor Multiplikatoren wirken
     var isAutoClickerActive by mutableStateOf(false)
         private set
             // Auto-Clicker
-    var autoClickerCost by mutableIntStateOf(200)
+    var autoClickerCost by mutableIntStateOf(100)
         private set
     var autoClickerCooldown by mutableIntStateOf(0)
         private set
@@ -32,7 +34,7 @@ class GameViewModel : ViewModel() {
             // passiver Score Generator
     var isPassiveScoreGeneratorActive by mutableStateOf(false)
         private set
-    var passiveScoreGeneratorCost by mutableIntStateOf(500) // Kosten für den passiven Generator
+    var passiveScoreGeneratorCost by mutableIntStateOf(100) // Kosten für den passiven Generator
         private set
     private val basePassiveScoreAmount = 5 // Basis-Score für den passiven Generator
             // Effektiver Score des passiven Generators (Basis + Bonus)
@@ -44,7 +46,7 @@ class GameViewModel : ViewModel() {
             // Fabrik-Upgrade
             var factoryUpgradeLevel by mutableIntStateOf(0)
                 private set
-    var factoryUpgradeCost by mutableIntStateOf(500) // Startkosten
+    var factoryUpgradeCost by mutableIntStateOf(100) // Startkosten
         private set
     private val factoryUpgradeBonusPerLevel = 5 // Bonus pro Level
 
@@ -53,16 +55,24 @@ class GameViewModel : ViewModel() {
     private var passiveScoreJob: Job? = null // Job für den passiven Score Generator
 
             // Events
-    fun onCookieClicked() {
-        score += clickMultiplier
+    fun onAerpClicked() { // Der Score wird als Int addiert, clickMultiplier ist jetzt Double
+        score += clickMultiplier.roundToInt() // Runden auf den nächsten Integer für die Score-Anzeige
     }
-            // Double Click
-    fun buyDoubleClickUpgrade() {
-        if (score >= doubleClickCost) {
-            score -= doubleClickCost
-            doubleClickLevel++ // Level erhöhen
-            clickMultiplier *= 2 // Die Multiplikator-Logik bleibt gleich (1 -> 2 -> 4 -> 8...)
-            doubleClickCost *= 2 // Kosten steigen exponentiell an (oder z.B. (doubleClickCost * 2.5).toInt())
+        // Double Click
+    fun buyClickBoostUpgrade() { // Umbenannt von buyDoubleClickUpgrade
+        if (score >= clickBoostCost) {
+            score -= clickBoostCost
+            clickBoostLevel++
+
+            // Multiplikator-Logik: Basis * 1.2^Level
+            // Beispiel: Level 0 -> 1.0 * 1.2^0 = 1.0
+            // Level 1 -> 1.0 * 1.2^1 = 1.2
+            // Level 2 -> 1.0 * 1.2^2 = 1.44
+            // Level 3 -> 1.0 * 1.2^3 = 1.728
+            clickMultiplier = baseClickValue * (1.2).pow(clickBoostLevel)
+
+            // Kostensteigerung (Beispiel: * 1.8 für das nächste Level)
+            clickBoostCost = (clickBoostCost * 2.0).roundToInt()
         }
     }
             // Auto Click
@@ -113,7 +123,7 @@ class GameViewModel : ViewModel() {
                     delay(1000) // 1 Sekunde warten
                 }
                 autoClickerCooldown = 0 // Cooldown abgelaufen
-                onCookieClicked()
+                onAerpClicked()
             }
             // Wenn der Auto-Klicker deaktiviert wird, Cooldown zurücksetzen
             if (!isAutoClickerActive) {

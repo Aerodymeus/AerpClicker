@@ -105,7 +105,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             )
 
             Button(
-                onClick = { gameViewModel.onCookieClicked() },
+                onClick = { gameViewModel.onAerpClicked() },
                 modifier = Modifier.size(200.dp)
             ) {
                 Text(
@@ -200,7 +200,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         val cost: Int,
         val onBuy: () -> Unit,
         val canAfford: Boolean,
-        val currentMultiplier: Int? = null, // Für Klick-Multiplikator
+        val currentMultiplier: Double? = null, // Für Klick-Multiplikator
         val currentProduction: Int? = null, // NEU: Für aktuelle Produktion (Aerp-Fabrik)
         val isActive: Boolean? = null, // Für AutoClicker, Aerp-Fabrik, Fabrik-Upgrade
         val description: String? = null,
@@ -210,13 +210,13 @@ fun ShopMenu(gameViewModel: GameViewModel) {
 
     val shopItemsList = listOf(
         ShopItemData(
-            name = stringResource(id = R.string.shop_item_double_aerps),
-            cost = gameViewModel.doubleClickCost,
-            currentMultiplier = gameViewModel.clickMultiplier,
-            onBuy = { gameViewModel.buyDoubleClickUpgrade() },
-            canAfford = gameViewModel.score >= gameViewModel.doubleClickCost,
-            description = stringResource(id = R.string.shop_item_double_aerps_description),
-            currentLevel = gameViewModel.doubleClickLevel
+            name = stringResource(id = R.string.shop_item_click_boost), // NEUER NAME
+            cost = gameViewModel.clickBoostCost,                         // NEUE KOSTEN-VARIABLE
+            currentMultiplier = gameViewModel.clickMultiplier,           // Multiplikator (jetzt Double)
+            onBuy = { gameViewModel.buyClickBoostUpgrade() },            // NEUE KAUF-FUNKTION
+            canAfford = gameViewModel.score >= gameViewModel.clickBoostCost,
+            description = stringResource(id = R.string.shop_item_click_boost_description), // NEUE BESCHREIBUNG
+            currentLevel = gameViewModel.clickBoostLevel                 // NEUE LEVEL-VARIABLE
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_auto_aerper),
@@ -279,8 +279,8 @@ fun ShopMenu(gameViewModel: GameViewModel) {
                     isActive = itemData.isActive,
                     description = itemData.description,
                     requiresBaseItemActive = itemData.requiresBaseItemActive, // Übergeben
-                    currentLevel = itemData.currentLevel
-                    // gameViewModel übergeben
+                    currentLevel = itemData.currentLevel,
+                    gameViewModel = gameViewModel
                 )
             }
         }
@@ -294,12 +294,13 @@ fun ShopItem(
     cost: Int,
     onBuy: () -> Unit,
     canAfford: Boolean,
-    currentMultiplier: Int? = null,
+    currentMultiplier: Double? = null,
     currentProduction: Int? = null,
     isActive: Boolean? = null,
     description: String? = null,
     requiresBaseItemActive: Boolean? = null,
-    currentLevel: Int? = null
+    currentLevel: Int? = null,
+    gameViewModel: GameViewModel
 ) {
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Text(name, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
@@ -313,11 +314,19 @@ fun ShopItem(
             )
         }
 
-        // Anzeige für Multiplikator und Produktion bleibt gleich...
-        if (currentMultiplier != null) { /* ... */ }
-        if (currentProduction != null && isActive == true) { /* ... */ }
+        // Anzeige des aktuellen Multiplikators (formatiert)
+        if (currentMultiplier != null && currentLevel != null && currentLevel > 0) {
+            // Formatieren des Doubles auf z.B. 2 Nachkommastellen für die Anzeige
+            val formattedMultiplier = String.format("%.2fx", currentMultiplier)
+            Text(
+                // text = stringResource(id = R.string.shop_item_multiplier_prefix) + formattedMultiplier, // Wenn du ein Prefix hast
+                text = "Aktueller Bonus: $formattedMultiplier", // Oder direkter Text
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+        }
 
-        // Ersetze die "Aktiv/Inaktiv"-Anzeige durch eine Level-Anzeige
         if (currentLevel != null) {
             Text(
                 text = stringResource(id = R.string.shop_item_level_prefix) + "$currentLevel",
@@ -346,16 +355,6 @@ fun ShopItem(
             )
         }
 
-//        if (isActive != null) {
-//            Text(
-//                if (isActive) stringResource(id = R.string.shop_item_status_active)
-//                else stringResource(id = R.string.shop_item_status_inactive),
-//                fontSize = 14.sp,
-//                style = MaterialTheme.typography.bodySmall,
-//                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-//            )
-//        }
-
         if (requiresBaseItemActive == true && isActive == false) {
             Text(
                 stringResource(id = R.string.shop_item_requires_base_prefix) +
@@ -379,24 +378,23 @@ fun ShopItem(
 
         Button(
             onClick = onBuy,
-            enabled = if (currentLevel != null) { // Spezifische Logik für das Upgrade-Item
-                canAfford
-            } else { // Alte Logik für die anderen Items
-                canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive || isActive == true)
-            },            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            enabled = if (currentLevel != null) { // Logik für Items mit Level (Klick-Verstärker, Fabrik-Upgrade)
+                canAfford && (requiresBaseItemActive != true || gameViewModel.isPassiveScoreGeneratorActive)
+            } else { // Logik für Items ohne Level (Auto-Klicker, Aerp-Fabrik)
+                canAfford && (isActive == null || !isActive)
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         ) {
             Text(
                 when {
-                    // Für das Upgrade-Item
-                    currentLevel != null -> {
-                        if (requiresBaseItemActive == true) {
+                    currentLevel != null -> { // Für Items mit Level
+                        if (requiresBaseItemActive == true && !gameViewModel.isPassiveScoreGeneratorActive && currentLevel == 0) {
                             stringResource(id = R.string.shop_item_buy_button_requires_base)
                         } else {
                             stringResource(id = R.string.shop_item_upgrade_button)
                         }
                     }
-                    // Für die anderen Items (alte Logik)
-                    isActive == true -> stringResource(id = R.string.shop_item_bought_button)
+                    isActive == true -> stringResource(id = R.string.shop_item_bought_button) // Für einmalige Items
                     else -> stringResource(id = R.string.shop_item_buy_button)
                 }
             )
