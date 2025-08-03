@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Aerp Clicker</string>
-</resources>
+    <resources>
+        <string name="app_name">Aerp Clicker</string>
+        <string name="get_aerps_text">Get Aerps!</string>
+        <string name="duplicate_aerps_label">Double Aerps</string> <!-- For the app title in the manifest and possibly elsewhere -->
+
+        <!-- UI.kt - AerpClickerApp -->
+        <string name="top_bar_title">Aerp Clicker</string>
+        <string name="menu_content_description">Open menu</string>
+
+        <!-- UI.kt - GameScreen -->
+        <string name="score_text">Aerps: %1$d</string> <!-- Prefix for the score -->
+        <string name="click_me_button">Get Aerps!</string>
+        <string name="cooldown_auto_clicker_prefix">Auto-Clicker: </string>
+        <string name="cooldown_aerp_factory_prefix">Aerp Factory: </string>
+        <string name="cooldown_suffix">s</string> <!-- Suffix for seconds -->
+
+        <!-- UI.kt - ShopMenu -->
+        <string name="shop_title">Upgrades</string>
+        <string name="shop_item_double_aerps">Double Aerps</string>
+        <string name="shop_item_auto_aerper">Auto-Aerper</string>
+        <string name="shop_item_aerp_factory">Aerp Factory</string>
+
+        <!-- UI.kt - ShopItem -->
+        <string name="shop_item_cost_prefix">Cost: </string>
+        <string name="shop_item_cost_suffix"> Aerps</string>
+        <string name="shop_item_multiplier_prefix">Current Multiplier: x</string>
+        <string name="shop_item_status_active">Active</string>
+        <string name="shop_item_status_inactive">Inactive</string>
+        <string name="shop_item_buy_button">Buy</string>
+        <string name="shop_item_bought_button">Purchased</string>
+
+        <!-- For the Factory Upgrade Item -->
+        <string name="shop_item_factory_upgrade">Factory Booster</string>
+        <string name="shop_item_factory_upgrade_description_active">The factory is now producing additional Aerps!</string>
+        <string name="shop_item_factory_upgrade_description_available">Boosts your Aerp Factory by an additional 5 Aerps per cycle.</string>
+        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
+        <string name="shop_item_buy_button_requires_base">Buy (Requires Base Item)</string> <!-- Optional, for the button text -->
+
+        <!-- For the factory's production display -->
+        <string name="shop_item_production_prefix">Production: </string>
+        <string name="shop_item_production_suffix"> Aerps/cycle</string>
+
+        <!-- For the hint that a base item is required -->
+        <string name="shop_item_requires_base_prefix">Requires: </string>
+        <string name="shop_item_requires_base_suffix"> </string>
+
+        <!-- Updated descriptions for the Aerp Factory -->
+        <string name="shop_item_aerp_factory_description_active">Produces %1$d Aerps per cycle.</string>
+        <string name="shop_item_aerp_factory_description_inactive">Buy a factory that produces %1$d Aerps per cycle.</string>
+
+        <!-- Descriptions for Shop-Items -->
+        <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
+        <string name="shop_item_auto_aerper_description">Automatically clicks for you every %1$d seconds.</string>
+ </resources>
