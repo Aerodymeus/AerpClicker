@@ -33,8 +33,7 @@
         <!-- For the Factory Upgrade Item -->
         <string name="shop_item_factory_upgrade">Factory Booster</string>
         <string name="shop_item_factory_upgrade_description_active">The factory is now producing additional Aerps!</string>
-        <string name="shop_item_factory_upgrade_description_available">Boosts your Aerp Factory by an additional 5 Aerps per cycle.</string>
-        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
+    <string name="shop_item_factory_upgrade_description_available">Increases your factory\'s production by another 5 Aerps per cycle.</string>        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
         <string name="shop_item_buy_button_requires_base">Buy (Requires Base Item)</string> <!-- Optional, for the button text -->
 
         <!-- For the factory's production display -->
@@ -52,4 +51,5 @@
         <!-- Descriptions for Shop-Items -->
         <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
         <string name="shop_item_auto_aerper_description">Automatically clicks for you every %1$d seconds.</string>
- </resources>
+    <string name="shop_item_upgrade_button">Upgrade</string>
+</resources>

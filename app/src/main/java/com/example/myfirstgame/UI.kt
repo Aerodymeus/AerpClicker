@@ -204,19 +204,19 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         val currentProduction: Int? = null, // NEU: Für aktuelle Produktion (Aerp-Fabrik)
         val isActive: Boolean? = null, // Für AutoClicker, Aerp-Fabrik, Fabrik-Upgrade
         val description: String? = null,
-        val requiresBaseItemActive: Boolean? = null // NEU: Für das Fabrik-Upgrade, um anzuzeigen, ob die Basis-Fabrik benötigt wird
+        val requiresBaseItemActive: Boolean? = null, // NEU: Für das Fabrik-Upgrade, um anzuzeigen, ob die Basis-Fabrik benötigt wird
+        val currentLevel: Int? = null
     )
-
-
 
     val shopItemsList = listOf(
         ShopItemData(
             name = stringResource(id = R.string.shop_item_double_aerps),
+            cost = gameViewModel.doubleClickCost,
             currentMultiplier = gameViewModel.clickMultiplier,
             onBuy = { gameViewModel.buyDoubleClickUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.doubleClickCost,
             description = stringResource(id = R.string.shop_item_double_aerps_description),
-            cost = gameViewModel.doubleClickCost
+            currentLevel = gameViewModel.doubleClickLevel
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_auto_aerper),
@@ -241,20 +241,19 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_factory_upgrade),
-            isActive = gameViewModel.isFactoryUpgradeActive,
+            cost = gameViewModel.factoryUpgradeCost,
+            // 'isActive' wird nicht mehr benötigt, wir verwenden 'currentLevel'
+            currentLevel = gameViewModel.factoryUpgradeLevel,
             onBuy = { gameViewModel.buyFactoryUpgrade() },
+            // Die Bedingung '!gameViewModel.isFactoryUpgradeActive' wird entfernt
             canAfford = gameViewModel.score >= gameViewModel.factoryUpgradeCost &&
-                    gameViewModel.isPassiveScoreGeneratorActive && // Upgrade kann nur gekauft werden, wenn Fabrik existiert
-                    !gameViewModel.isFactoryUpgradeActive, // Und wenn Upgrade noch nicht gekauft wurde
-            requiresBaseItemActive = !gameViewModel.isPassiveScoreGeneratorActive, // Zeigt an, dass die Basis-Fabrik benötigt wird, falls sie noch nicht aktiv ist
-            description = if (gameViewModel.isFactoryUpgradeActive) {
-                stringResource(id = R.string.shop_item_factory_upgrade_description_active)
-            } else if (!gameViewModel.isPassiveScoreGeneratorActive) {
+                    gameViewModel.isPassiveScoreGeneratorActive,
+            requiresBaseItemActive = !gameViewModel.isPassiveScoreGeneratorActive,
+            description = if (!gameViewModel.isPassiveScoreGeneratorActive) {
                 stringResource(id = R.string.shop_item_factory_upgrade_description_requires_factory)
             } else {
                 stringResource(id = R.string.shop_item_factory_upgrade_description_available)
             },
-            cost = gameViewModel.factoryUpgradeCost
         )
     )
 
@@ -280,7 +279,8 @@ fun ShopMenu(gameViewModel: GameViewModel) {
                     isActive = itemData.isActive,
                     description = itemData.description,
                     requiresBaseItemActive = itemData.requiresBaseItemActive, // Übergeben
-                    gameViewModel = gameViewModel // gameViewModel übergeben
+                    currentLevel = itemData.currentLevel
+                    // gameViewModel übergeben
                 )
             }
         }
@@ -299,7 +299,7 @@ fun ShopItem(
     isActive: Boolean? = null,
     description: String? = null,
     requiresBaseItemActive: Boolean? = null,
-    gameViewModel: GameViewModel
+    currentLevel: Int? = null
 ) {
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Text(name, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
@@ -313,13 +313,26 @@ fun ShopItem(
             )
         }
 
-        if (currentMultiplier != null) {
+        // Anzeige für Multiplikator und Produktion bleibt gleich...
+        if (currentMultiplier != null) { /* ... */ }
+        if (currentProduction != null && isActive == true) { /* ... */ }
+
+        // Ersetze die "Aktiv/Inaktiv"-Anzeige durch eine Level-Anzeige
+        if (currentLevel != null) {
             Text(
-                // Hier gehen wir davon aus, dass R.string.shop_item_multiplier_prefix bereits ein Leerzeichen am Ende hat ODER wir fügen es hier hinzu.
-                // Um sicherzugehen, explizit hinzufügen:
-                stringResource(id = R.string.shop_item_multiplier_prefix) + " $currentMultiplier",
+                text = stringResource(id = R.string.shop_item_level_prefix) + "$currentLevel",
                 fontSize = 14.sp,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        } else if (isActive != null) {
+            // Fallback für andere Items, die weiterhin Aktiv/Inaktiv verwenden
+            Text(
+                if (isActive) stringResource(id = R.string.shop_item_status_active)
+                else stringResource(id = R.string.shop_item_status_inactive),
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
 
@@ -333,15 +346,15 @@ fun ShopItem(
             )
         }
 
-        if (isActive != null) {
-            Text(
-                if (isActive) stringResource(id = R.string.shop_item_status_active)
-                else stringResource(id = R.string.shop_item_status_inactive),
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
+//        if (isActive != null) {
+//            Text(
+//                if (isActive) stringResource(id = R.string.shop_item_status_active)
+//                else stringResource(id = R.string.shop_item_status_inactive),
+//                fontSize = 14.sp,
+//                style = MaterialTheme.typography.bodySmall,
+//                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+//            )
+//        }
 
         if (requiresBaseItemActive == true && isActive == false) {
             Text(
@@ -366,13 +379,24 @@ fun ShopItem(
 
         Button(
             onClick = onBuy,
-            enabled = canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive || isActive == true),
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+            enabled = if (currentLevel != null) { // Spezifische Logik für das Upgrade-Item
+                canAfford
+            } else { // Alte Logik für die anderen Items
+                canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive || isActive == true)
+            },            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         ) {
             Text(
                 when {
+                    // Für das Upgrade-Item
+                    currentLevel != null -> {
+                        if (requiresBaseItemActive == true) {
+                            stringResource(id = R.string.shop_item_buy_button_requires_base)
+                        } else {
+                            stringResource(id = R.string.shop_item_upgrade_button)
+                        }
+                    }
+                    // Für die anderen Items (alte Logik)
                     isActive == true -> stringResource(id = R.string.shop_item_bought_button)
-                    requiresBaseItemActive == true && !gameViewModel.isPassiveScoreGeneratorActive -> stringResource(id = R.string.shop_item_buy_button_requires_base)
                     else -> stringResource(id = R.string.shop_item_buy_button)
                 }
             )

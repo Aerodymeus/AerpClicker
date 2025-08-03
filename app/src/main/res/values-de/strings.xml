@@ -32,7 +32,7 @@
     <!-- Für das Fabrik-Upgrade Item -->
     <string name="shop_item_factory_upgrade">Fabrik-Booster</string>
     <string name="shop_item_factory_upgrade_description_active">"Die Fabrik produziert jetzt zusätzliche Aerps!     "</string>
-    <string name="shop_item_factory_upgrade_description_available">Erhöht die Produktion deiner Fabrik um weitere 5 Aerps pro Zyklus.</string>
+    <string name="shop_item_factory_upgrade_description_available">Verstärkt deine Aerp-Fabrik um weitere 5 Aerps pro Zyklus. </string>
     <string name="shop_item_factory_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik, um diesen Booster zu kaufen.</string>
     <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string> <!-- Optional, für den Button-Text -->
 
@@ -52,12 +52,6 @@
     <!-- Beschreibungen für Shop-Items -->
     <string name="shop_item_double_aerps_description">"Verdoppelt die Anzahl der Aerps, die du pro Klick erhältst.     "</string>
     <string name="shop_item_auto_aerper_description">"Klickt automatisch alle %1$d Sekunden für dich.\n    "</string>
-    <!-- ... alle anderen strings ... -->
-
-    <!-- NEUE STRINGS FÜR MEHRFACHEN KAUF -->
-    <string name="shop_item_level_prefix" translatable="false">Level: </string>
     <string name="shop_item_upgrade_button">Verbessern</string>
-
-
 
 </resources>

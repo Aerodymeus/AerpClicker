@@ -12,16 +12,19 @@ import kotlinx.coroutines.launch
 
 class GameViewModel : ViewModel() {
     // UI State
-    var score by mutableStateOf(0)
+    var score by mutableIntStateOf(0) // Empfehlung: Int statt State<Int> für einfache Zahlentypen
         private set
-    var clickMultiplier by mutableStateOf(1)
+    var clickMultiplier by mutableIntStateOf(1)
         private set
-    var doubleClickCost by mutableStateOf(50)
+    var doubleClickCost by mutableIntStateOf(50)
+        private set
+    // NEU: Level-Zähler für das Klick-Upgrade
+    var doubleClickLevel by mutableIntStateOf(0)
         private set
     var isAutoClickerActive by mutableStateOf(false)
         private set
             // Auto-Clicker
-    var autoClickerCost by mutableStateOf(200)
+    var autoClickerCost by mutableIntStateOf(200)
         private set
     var autoClickerCooldown by mutableIntStateOf(0)
         private set
@@ -29,7 +32,7 @@ class GameViewModel : ViewModel() {
             // passiver Score Generator
     var isPassiveScoreGeneratorActive by mutableStateOf(false)
         private set
-    var passiveScoreGeneratorCost by mutableStateOf(500) // Kosten für den passiven Generator
+    var passiveScoreGeneratorCost by mutableIntStateOf(500) // Kosten für den passiven Generator
         private set
     private val basePassiveScoreAmount = 5 // Basis-Score für den passiven Generator
             // Effektiver Score des passiven Generators (Basis + Bonus)
@@ -39,11 +42,11 @@ class GameViewModel : ViewModel() {
         private set
     private val passiveGeneratorInterval = 10 // Sekunden
             // Fabrik-Upgrade
-    var isFactoryUpgradeActive by mutableStateOf(false)
+            var factoryUpgradeLevel by mutableIntStateOf(0)
+                private set
+    var factoryUpgradeCost by mutableIntStateOf(500) // Startkosten
         private set
-    var factoryUpgradeCost by mutableStateOf(1000) // Kosten für das Fabrik-Upgrade
-        private set
-    private val factoryUpgradeBonus = 5 // Bonus-Punkte für die Fabrik durch das Upgrade
+    private val factoryUpgradeBonusPerLevel = 5 // Bonus pro Level
 
 
     private var autoClickJob: Job? = null
@@ -57,8 +60,9 @@ class GameViewModel : ViewModel() {
     fun buyDoubleClickUpgrade() {
         if (score >= doubleClickCost) {
             score -= doubleClickCost
-            clickMultiplier *= 2
-            doubleClickCost *= 2
+            doubleClickLevel++ // Level erhöhen
+            clickMultiplier *= 2 // Die Multiplikator-Logik bleibt gleich (1 -> 2 -> 4 -> 8...)
+            doubleClickCost *= 2 // Kosten steigen exponentiell an (oder z.B. (doubleClickCost * 2.5).toInt())
         }
     }
             // Auto Click
@@ -74,31 +78,31 @@ class GameViewModel : ViewModel() {
         if (score >= passiveScoreGeneratorCost && !isPassiveScoreGeneratorActive) {
             score -= passiveScoreGeneratorCost
             isPassiveScoreGeneratorActive = true
+            updateEffectivePassiveScoreAmount()
             startPassiveScoreGenerator()
         }
     }
             // Fabrik-Upgrade
-    fun buyFactoryUpgrade() {
-        if (score >= factoryUpgradeCost && isPassiveScoreGeneratorActive && !isFactoryUpgradeActive) {
-            score -= factoryUpgradeCost
-            isFactoryUpgradeActive = true
-            updateEffectivePassiveScoreAmount() // Effektiven Wert aktualisieren
-            // Optional: Kosten für zukünftige Upgrades erhöhen, falls gewünscht
-            // factoryUpgradeCost *= 2
-        }
-    }
+            fun buyFactoryUpgrade() {
+                // Die Prüfung !isFactoryUpgradeActive wird entfernt, da man immer wieder kaufen kann.
+                if (score >= factoryUpgradeCost && isPassiveScoreGeneratorActive) {
+                    score -= factoryUpgradeCost
+                    factoryUpgradeLevel++ // Level erhöhen statt Boolean zu setzen
 
-    // NEU: Hilfsfunktion zur Aktualisierung des effektiven passiven Scores
+                    // Kosten für das nächste Level erhöhen (z.B. um 50%)
+                    factoryUpgradeCost = (factoryUpgradeCost * 1.5).toInt()
+
+                    updateEffectivePassiveScoreAmount()
+                }
+            }
+
     private fun updateEffectivePassiveScoreAmount() {
-        effectivePassiveScoreAmount = if (isFactoryUpgradeActive) {
-            basePassiveScoreAmount + factoryUpgradeBonus
-        } else {
-            basePassiveScoreAmount
-        }
+        // Der Bonus ist jetzt Level * Bonus pro Level
+        val totalBonus = factoryUpgradeLevel * factoryUpgradeBonusPerLevel
+        effectivePassiveScoreAmount = basePassiveScoreAmount + totalBonus
     }
 
-
-            // Coroutine für den AutoClicker
+       // Coroutine für den AutoClicker
     private fun startAutoClicker() {
         autoClickJob?.cancel()
         autoClickJob = viewModelScope.launch {
