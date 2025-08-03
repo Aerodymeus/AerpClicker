@@ -45,16 +45,23 @@
         <string name="shop_item_requires_base_suffix"> </string>
 
         <!-- Updated descriptions for the Aerp Factory -->
-        <string name="shop_item_aerp_factory_description_active">Produces %1$d Aerps per cycle.</string>
-        <string name="shop_item_aerp_factory_description_inactive">Buy a factory that produces %1$d Aerps per cycle.</string>
+        <string name="shop_item_aerp_factory_description_active">Produces %.1f Aerps per cycle.</string>
+        <string name="shop_item_aerp_factory_description_inactive">Buy a factory that produces %.1f Aerps per cycle.</string>
 
         <!-- Descriptions for Shop-Items -->
         <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
         <string name="shop_item_auto_aerper_description">Automatically clicks for you every %1$d seconds.</string>
+    <string name="shop_item_level_prefix">"Level: "</string>
     <string name="shop_item_upgrade_button">Upgrade</string>
 
         <!-- For the Click Upgrade (previously "Double Aerps") -->
         <string name="shop_item_click_boost">Aerp Booster</string> <!-- NEW NAME -->
         <string name="shop_item_click_boost_description">Increases Aerps per click by 20%.</string> <!-- NEW DESCRIPTION -->
+
+        <string name="shop_item_auto_clicker_interval_upgrade">Faster Clicker</string>
+        <string name="shop_item_auto_clicker_interval_upgrade_description">Reduces Auto-Clicker interval by 0.1s. Current: %.1fs</string>
+        <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximum speed reached (%.1fs)!</string>
+        <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Requires active Auto-Clicker.</string>
+
 
 </resources>

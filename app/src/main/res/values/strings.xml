@@ -18,7 +18,7 @@
     <string name="shop_title">Verbesserungen</string>
     <string name="shop_item_double_aerps">Doppelte Aerps</string>
     <string name="shop_item_auto_aerper">Auto-Aerper</string>
-    <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
+
 
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten: </string>
@@ -28,6 +28,11 @@
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
+#
+    <!-- die Aerp-Fabrik -->
+    <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
+    <string name="shop_item_aerp_factory_description_active">Produziert %.1f Aerps pro Zyklus.</string>
+    <string name="shop_item_aerp_factory_description_inactive">Kauft eine Fabrik, die %.1f Aerps pro Zyklus produziert.</string>
 
     <!-- Für das Fabrik-Upgrade Item -->
     <string name="shop_item_factory_upgrade">Fabrik-Booster</string>
@@ -44,10 +49,7 @@
     <string name="shop_item_requires_base_prefix">Benötigt: </string>
     <string name="shop_item_requires_base_suffix"> </string>
 
-    <!-- Aktualisierte Beschreibungen für die Aerp-Fabrik -->
-    <string name="shop_item_aerp_factory_description_active">Produziert %1$d Aerps pro Zyklus.</string>
-    <string name="shop_item_aerp_factory_description_inactive">Kauft eine Fabrik, die %1$d Aerps pro Zyklus produziert.</string>
-    <!-- ... andere Strings ... -->
+   <!-- ... andere Strings ... -->
 
     <!-- Beschreibungen für Shop-Items -->
     <string name="shop_item_double_aerps_description">"Verdoppelt die Anzahl der Aerps, die du pro Klick erhältst.     "</string>
@@ -55,21 +57,26 @@
     <!-- ... alle anderen strings ... -->
 
     <!-- NEUE STRINGS FÜR MEHRFACHEN KAUF -->
-    <string name="shop_item_level_prefix" translatable="false">Level: </string>
+    <string name="shop_item_level_prefix">"Stufe: "</string>
     <string name="shop_item_upgrade_button">Verbessern</string>
     <!-- ... andere Strings ... -->
 
     <!-- Für das Klick-Upgrade (vorher "Doppelte Aerps") -->
     <string name="shop_item_click_boost">Aerp-Verstärker</string> <!-- NEUER NAME -->
     <string name="shop_item_click_boost_description">Erhöht die Aerps pro Klick um 20%.</string>
+    <!-- ... andere Strings ... -->
+    <string name="shop_item_auto_clicker_interval_upgrade">Schneller Klicker</string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description">Reduziert das Auto-Klicker
+        Intervall um 0.1s. Aktuell: %.1fs
+    </string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximale
+        Geschwindigkeit erreicht (%.1fs)!
+    </string>
+    <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Benötigt aktiven
+        Auto-Klicker.
+    </string>
 
 
 
 
-    <!-- ... other strings ... -->
-
-    <!-- For the Click Upgrade (previously "Double Aerps") -->
-    <!-- <string name="shop_item_click_boost">Click Booster</string> -->
- <!-- NEW NAME -->
-    <!-- <string name="shop_item_click_boost_description">Increases Aerps per click by 20%.</string> -->
 </resources>
