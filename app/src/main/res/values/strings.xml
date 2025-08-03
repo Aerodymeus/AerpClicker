@@ -17,10 +17,8 @@
     <!-- UI.kt - ShopMenu -->
     <string name="shop_title">Verbesserungen</string>
     <string name="shop_item_double_aerps">Doppelte Aerps</string>
-    <string name="shop_item_auto_aerper">Auto-Aerper (Alle 10 Sek.)</string>
-    <string name="shop_item_aerp_factory">Aerp-Fabrik (+5 alle 10 Sek.)</string>
-    <string name="shop_item_aerp_factory_description_active">Produziert 5 Aerps alle 10 Sek.
-    </string>
+    <string name="shop_item_auto_aerper">Auto-Aerper</string>
+    <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
 
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten:</string>
@@ -30,4 +28,39 @@
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
+
+    <!-- Für das Fabrik-Upgrade Item -->
+    <string name="shop_item_factory_upgrade">Fabrik-Booster</string>
+    <string name="shop_item_factory_upgrade_description_active">Die Fabrik produziert jetzt
+        zusätzliche Aerps!
+    </string>
+    <string name="shop_item_factory_upgrade_description_available">Verstärkt deine Aerp-Fabrik um
+        weitere 5 Aerps pro Zyklus.
+    </string>
+    <string name="shop_item_factory_upgrade_description_requires_factory">Du benötigst zuerst eine
+        Aerp-Fabrik, um diesen Booster zu kaufen.
+    </string>
+    <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string> <!-- Optional, für den Button-Text -->
+
+    <!-- Für die Anzeige der Produktion der Fabrik -->
+    <string name="shop_item_production_prefix">Produktion:</string>
+    <string name="shop_item_production_suffix">Aerps/Zyklus</string>
+
+    <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
+    <string name="shop_item_requires_base_prefix">Benötigt:</string>
+    <string name="shop_item_requires_base_suffix"></string>
+
+    <!-- Aktualisierte Beschreibungen für die Aerp-Fabrik -->
+    <string name="shop_item_aerp_factory_description_active">Produziert %1$d Aerps pro Zyklus.</string>
+    <string name="shop_item_aerp_factory_description_inactive">Kauft eine Fabrik, die %1$d Aerps pro Zyklus produziert.</string>
+    <!-- ... andere Strings ... -->
+
+    <!-- Beschreibungen für Shop-Items -->
+    <string name="shop_item_double_aerps_description">Verdoppelt die Anzahl der Aerps, die du pro
+        Klick erhältst.
+    </string>
+    <string name="shop_item_auto_aerper_description">Klickt automatisch alle %1$d Sekunden für
+        dich.
+    </string>
+
 </resources>

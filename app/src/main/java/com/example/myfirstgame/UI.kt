@@ -1,5 +1,6 @@
 package com.example.myfirstgame
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration // Import für Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration // Import für LocalConfiguration
 //import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource // Import für stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview // Import für Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -108,7 +110,8 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             ) {
                 Text(
                     text = stringResource(id = R.string.click_me_button),
-                    fontSize = 24.sp
+                    fontSize = 24.sp,
+                    textAlign = TextAlign.Center // Text zentrieren
                 )
             }
         }
@@ -198,33 +201,61 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         val cost: Int,
         val onBuy: () -> Unit,
         val canAfford: Boolean,
-        val currentMultiplier: Int? = null,
-        val isActive: Boolean? = null,
-        val description: String? = null
+        val currentMultiplier: Int? = null, // Für Klick-Multiplikator
+        val currentProduction: Int? = null, // NEU: Für aktuelle Produktion (Aerp-Fabrik)
+        val isActive: Boolean? = null, // Für AutoClicker, Aerp-Fabrik, Fabrik-Upgrade
+        val description: String? = null,
+        val requiresBaseItemActive: Boolean? = null // NEU: Für das Fabrik-Upgrade, um anzuzeigen, ob die Basis-Fabrik benötigt wird
     )
+
+
 
     val shopItemsList = listOf(
         ShopItemData(
             name = stringResource(id = R.string.shop_item_double_aerps),
-            cost = gameViewModel.doubleClickCost,
             currentMultiplier = gameViewModel.clickMultiplier,
             onBuy = { gameViewModel.buyDoubleClickUpgrade() },
-            canAfford = gameViewModel.score >= gameViewModel.doubleClickCost
+            canAfford = gameViewModel.score >= gameViewModel.doubleClickCost,
+            description = stringResource(id = R.string.shop_item_double_aerps_description),
+            cost = gameViewModel.doubleClickCost
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_auto_aerper),
-            cost = gameViewModel.autoClickerCost,
             isActive = gameViewModel.isAutoClickerActive,
             onBuy = { gameViewModel.buyAutoClickerUpgrade() },
-            canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive
+            canAfford = gameViewModel.score >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive,
+            description = stringResource(id = R.string.shop_item_auto_aerper_description, gameViewModel.autoClickerInterval),
+            cost = gameViewModel.autoClickerCost
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_aerp_factory),
-            cost = gameViewModel.passiveScoreGeneratorCost,
             isActive = gameViewModel.isPassiveScoreGeneratorActive,
+            currentProduction = gameViewModel.effectivePassiveScoreAmount, // Zeige die *effektive* Produktion an
             onBuy = { gameViewModel.buyPassiveScoreGenerator() },
             canAfford = gameViewModel.score >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
-            description = if (gameViewModel.isPassiveScoreGeneratorActive) stringResource(id = R.string.shop_item_aerp_factory_description_active) else null
+            description = if (gameViewModel.isPassiveScoreGeneratorActive) {
+                stringResource(id = R.string.shop_item_aerp_factory_description_active, gameViewModel.effectivePassiveScoreAmount)
+            } else {
+                stringResource(id = R.string.shop_item_aerp_factory_description_inactive, gameViewModel.effectivePassiveScoreAmount) // Zeige hier den Basiswert an, was die Fabrik produzieren WÜRDE
+            },
+            cost = gameViewModel.passiveScoreGeneratorCost
+        ),
+        ShopItemData(
+            name = stringResource(id = R.string.shop_item_factory_upgrade), // NEUE String-Ressource
+            isActive = gameViewModel.isFactoryUpgradeActive,
+            onBuy = { gameViewModel.buyFactoryUpgrade() },
+            canAfford = gameViewModel.score >= gameViewModel.factoryUpgradeCost &&
+                    gameViewModel.isPassiveScoreGeneratorActive && // Upgrade kann nur gekauft werden, wenn Fabrik existiert
+                    !gameViewModel.isFactoryUpgradeActive, // Und wenn Upgrade noch nicht gekauft wurde
+            requiresBaseItemActive = !gameViewModel.isPassiveScoreGeneratorActive, // Zeigt an, dass die Basis-Fabrik benötigt wird, falls sie noch nicht aktiv ist
+            description = if (gameViewModel.isFactoryUpgradeActive) {
+                stringResource(id = R.string.shop_item_factory_upgrade_description_active) // NEUE String-Ressource
+            } else if (!gameViewModel.isPassiveScoreGeneratorActive) {
+                stringResource(id = R.string.shop_item_factory_upgrade_description_requires_factory) // NEUE String-Ressource
+            } else {
+                stringResource(id = R.string.shop_item_factory_upgrade_description_available) // NEUE String-Ressource
+            },
+            cost = gameViewModel.factoryUpgradeCost
         )
     )
 
@@ -237,7 +268,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
 
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp) // Etwas mehr Abstand zwischen den Items
         ) {
             items(shopItemsList) { itemData ->
                 ShopItem(
@@ -246,8 +277,10 @@ fun ShopMenu(gameViewModel: GameViewModel) {
                     onBuy = itemData.onBuy,
                     canAfford = itemData.canAfford,
                     currentMultiplier = itemData.currentMultiplier,
+                    currentProduction = itemData.currentProduction, // Übergeben
                     isActive = itemData.isActive,
-                    description = itemData.description
+                    description = itemData.description,
+                    requiresBaseItemActive = itemData.requiresBaseItemActive // Übergeben
                 )
             }
         }
@@ -262,58 +295,97 @@ fun ShopItem(
     onBuy: () -> Unit,
     canAfford: Boolean,
     currentMultiplier: Int? = null,
+    currentProduction: Int? = null,
     isActive: Boolean? = null,
-    description: String? = null
+    description: String? = null,
+    requiresBaseItemActive: Boolean? = null
 ) {
-    Column {
-        Text(name, fontSize = 18.sp) // Name kommt bereits als String-Ressource aus ShopMenu
+    Column(modifier = Modifier.padding(bottom = 8.dp)) { // Etwas Padding unter jedem Item
+        Text(name, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
         Text(
             stringResource(id = R.string.shop_item_cost_prefix) +
                     "$cost" +
                     stringResource(id = R.string.shop_item_cost_suffix),
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodySmall
         )
         if (currentMultiplier != null) {
             Text(
                 stringResource(id = R.string.shop_item_multiplier_prefix) + "$currentMultiplier",
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        if (currentProduction != null && isActive == true) { // Zeige Produktion nur an, wenn das Item (Fabrik) aktiv ist
+            Text(
+                stringResource(id = R.string.shop_item_production_prefix) + "$currentProduction" + stringResource(id = R.string.shop_item_production_suffix),
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall
             )
         }
         if (isActive != null) {
             Text(
                 if (isActive) stringResource(id = R.string.shop_item_status_active)
                 else stringResource(id = R.string.shop_item_status_inactive),
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
         if (description != null) {
-            Text(description, fontSize = 14.sp) // Beschreibung kommt bereits als String-Ressource aus ShopMenu
+            Text(
+                description,
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+            )
+        }
+        if (requiresBaseItemActive == true && isActive == false) { // Zeige Hinweis nur, wenn Basis-Item fehlt UND das Upgrade selbst noch nicht aktiv ist
+            Text(
+                stringResource(id = R.string.shop_item_requires_base_prefix) + stringResource(id = R.string.shop_item_aerp_factory) + stringResource(id = R.string.shop_item_requires_base_suffix), // Beispiel: "Benötigt: Aerp-Fabrik"
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
         }
         Button(
             onClick = onBuy,
-            enabled = canAfford,
+            enabled = canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive), // Button ist kaufbar, wenn `canAfford` UND (entweder kein `requiresBaseItemActive` vorhanden ODER es nicht `true` ist)
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                if (isActive == true) stringResource(id = R.string.shop_item_bought_button)
-                else stringResource(id = R.string.shop_item_buy_button)
+                // Logik für den Button-Text anpassen
+                when {
+                    isActive == true -> stringResource(id = R.string.shop_item_bought_button)
+                    requiresBaseItemActive == true -> stringResource(id = R.string.shop_item_buy_button_requires_base) // Eigener Text, wenn Basis fehlt
+                    else -> stringResource(id = R.string.shop_item_buy_button)
+                }
             )
         }
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, name = "Portrait Preview")
 @Composable
 fun DefaultPreviewPortrait() {
     MaterialTheme {
-        AerpClickerApp()
+        // Für eine bessere Preview könntest du hier einen ViewModel mit bestimmten Zuständen erstellen
+        val previewViewModel = GameViewModel()
+        // Beispiel: Fabrik ist aktiv, Upgrade noch nicht
+        // previewViewModel.score = 2000
+        // previewViewModel.buyPassiveScoreGenerator() // Simuliere den Kauf der Fabrik
+        AerpClickerApp(gameViewModel = previewViewModel)
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, device = "spec:width=640dp,height=360dp,dpi=480", name = "Landscape Preview")
 @Composable
 fun DefaultPreviewLandscape() {
     MaterialTheme {
-        AerpClickerApp() // Hier könntest du einen Test-ViewModel mit aktiven Cooldowns injecten für eine bessere Preview
+        // Für eine bessere Preview könntest du hier einen ViewModel mit bestimmten Zuständen erstellen
+        val previewViewModel = GameViewModel()
+        AerpClickerApp(gameViewModel = previewViewModel)
     }
 }

@@ -20,31 +20,40 @@ class GameViewModel : ViewModel() {
         private set
     var isAutoClickerActive by mutableStateOf(false)
         private set
+            // Auto-Clicker
     var autoClickerCost by mutableStateOf(200)
         private set
-    // Cooldown für Auto-Klicker (in Sekunden)
     var autoClickerCooldown by mutableIntStateOf(0)
         private set
-    private val autoClickerInterval = 10 // Sekunden
-
+    val autoClickerInterval = 10 // Sekunden
+            // passiver Score Generator
     var isPassiveScoreGeneratorActive by mutableStateOf(false)
         private set
     var passiveScoreGeneratorCost by mutableStateOf(500) // Kosten für den passiven Generator
         private set
-    private val passiveScoreAmount = 5 // Menge, die alle 10 Sekunden hinzugefügt wird
-    // Cooldown für Cookie-Fabrik (in Sekunden)
+    private val basePassiveScoreAmount = 5 // Basis-Score für den passiven Generator
+            // Effektiver Score des passiven Generators (Basis + Bonus)
+    var effectivePassiveScoreAmount by mutableIntStateOf(basePassiveScoreAmount)
+        private set
     var passiveGeneratorCooldown by mutableIntStateOf(0)
         private set
     private val passiveGeneratorInterval = 10 // Sekunden
+            // Fabrik-Upgrade
+    var isFactoryUpgradeActive by mutableStateOf(false)
+        private set
+    var factoryUpgradeCost by mutableStateOf(1000) // Kosten für das Fabrik-Upgrade
+        private set
+    private val factoryUpgradeBonus = 5 // Bonus-Punkte für die Fabrik durch das Upgrade
+
 
     private var autoClickJob: Job? = null
     private var passiveScoreJob: Job? = null // Job für den passiven Score Generator
 
-    // Events
+            // Events
     fun onCookieClicked() {
         score += clickMultiplier
     }
-
+            // Double Click
     fun buyDoubleClickUpgrade() {
         if (score >= doubleClickCost) {
             score -= doubleClickCost
@@ -52,7 +61,7 @@ class GameViewModel : ViewModel() {
             doubleClickCost *= 2
         }
     }
-
+            // Auto Click
     fun buyAutoClickerUpgrade() {
         if (score >= autoClickerCost && !isAutoClickerActive) {
             score -= autoClickerCost
@@ -60,8 +69,7 @@ class GameViewModel : ViewModel() {
             startAutoClicker()
         }
     }
-
-    // Neues Item kaufen
+            // Passiver Score Generator
     fun buyPassiveScoreGenerator() {
         if (score >= passiveScoreGeneratorCost && !isPassiveScoreGeneratorActive) {
             score -= passiveScoreGeneratorCost
@@ -69,7 +77,28 @@ class GameViewModel : ViewModel() {
             startPassiveScoreGenerator()
         }
     }
-    // Coroutine für den AutoClicker
+            // Fabrik-Upgrade
+    fun buyFactoryUpgrade() {
+        if (score >= factoryUpgradeCost && isPassiveScoreGeneratorActive && !isFactoryUpgradeActive) {
+            score -= factoryUpgradeCost
+            isFactoryUpgradeActive = true
+            updateEffectivePassiveScoreAmount() // Effektiven Wert aktualisieren
+            // Optional: Kosten für zukünftige Upgrades erhöhen, falls gewünscht
+            // factoryUpgradeCost *= 2
+        }
+    }
+
+    // NEU: Hilfsfunktion zur Aktualisierung des effektiven passiven Scores
+    private fun updateEffectivePassiveScoreAmount() {
+        effectivePassiveScoreAmount = if (isFactoryUpgradeActive) {
+            basePassiveScoreAmount + factoryUpgradeBonus
+        } else {
+            basePassiveScoreAmount
+        }
+    }
+
+
+            // Coroutine für den AutoClicker
     private fun startAutoClicker() {
         autoClickJob?.cancel()
         autoClickJob = viewModelScope.launch {
@@ -100,7 +129,7 @@ class GameViewModel : ViewModel() {
                     delay(1000) // 1 Sekunde warten
                 }
                 passiveGeneratorCooldown = 0 // Cooldown abgelaufen
-                score += passiveScoreAmount
+                score += effectivePassiveScoreAmount // Den effektiven Wert verwenden
             }
             // Wenn der Generator deaktiviert wird, Cooldown zurücksetzen
             if (!isPassiveScoreGeneratorActive) {
@@ -108,6 +137,8 @@ class GameViewModel : ViewModel() {
             }
         }
     }
+
+
 
 
     override fun onCleared() {
