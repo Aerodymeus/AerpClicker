@@ -126,7 +126,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         ) {
             if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
                 Text(
-                    text = stringResource(id = R.string.cooldown_auto_clicker_prefix) +
+                    text = stringResource(id = R.string.cooldown_auto_clicker_prefix) + " " +
                             "${gameViewModel.autoClickerCooldown}" +
                             stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp,
@@ -135,7 +135,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             }
             if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
                 Text(
-                    text = stringResource(id = R.string.cooldown_aerp_factory_prefix) +
+                    text = stringResource(id = R.string.cooldown_aerp_factory_prefix) + " " +
                             "${gameViewModel.passiveGeneratorCooldown}" +
                             stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp
@@ -195,7 +195,6 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
 
 @Composable
 fun ShopMenu(gameViewModel: GameViewModel) {
-    //val context = LocalContext.current
     data class ShopItemData(
         val name: String,
         val cost: Int,
@@ -241,7 +240,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             cost = gameViewModel.passiveScoreGeneratorCost
         ),
         ShopItemData(
-            name = stringResource(id = R.string.shop_item_factory_upgrade), // NEUE String-Ressource
+            name = stringResource(id = R.string.shop_item_factory_upgrade),
             isActive = gameViewModel.isFactoryUpgradeActive,
             onBuy = { gameViewModel.buyFactoryUpgrade() },
             canAfford = gameViewModel.score >= gameViewModel.factoryUpgradeCost &&
@@ -249,11 +248,11 @@ fun ShopMenu(gameViewModel: GameViewModel) {
                     !gameViewModel.isFactoryUpgradeActive, // Und wenn Upgrade noch nicht gekauft wurde
             requiresBaseItemActive = !gameViewModel.isPassiveScoreGeneratorActive, // Zeigt an, dass die Basis-Fabrik benötigt wird, falls sie noch nicht aktiv ist
             description = if (gameViewModel.isFactoryUpgradeActive) {
-                stringResource(id = R.string.shop_item_factory_upgrade_description_active) // NEUE String-Ressource
+                stringResource(id = R.string.shop_item_factory_upgrade_description_active)
             } else if (!gameViewModel.isPassiveScoreGeneratorActive) {
-                stringResource(id = R.string.shop_item_factory_upgrade_description_requires_factory) // NEUE String-Ressource
+                stringResource(id = R.string.shop_item_factory_upgrade_description_requires_factory)
             } else {
-                stringResource(id = R.string.shop_item_factory_upgrade_description_available) // NEUE String-Ressource
+                stringResource(id = R.string.shop_item_factory_upgrade_description_available)
             },
             cost = gameViewModel.factoryUpgradeCost
         )
@@ -280,7 +279,8 @@ fun ShopMenu(gameViewModel: GameViewModel) {
                     currentProduction = itemData.currentProduction, // Übergeben
                     isActive = itemData.isActive,
                     description = itemData.description,
-                    requiresBaseItemActive = itemData.requiresBaseItemActive // Übergeben
+                    requiresBaseItemActive = itemData.requiresBaseItemActive, // Übergeben
+                    gameViewModel = gameViewModel // gameViewModel übergeben
                 )
             }
         }
@@ -298,31 +298,41 @@ fun ShopItem(
     currentProduction: Int? = null,
     isActive: Boolean? = null,
     description: String? = null,
-    requiresBaseItemActive: Boolean? = null
+    requiresBaseItemActive: Boolean? = null,
+    gameViewModel: GameViewModel
 ) {
-    Column(modifier = Modifier.padding(bottom = 8.dp)) { // Etwas Padding unter jedem Item
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Text(name, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
-        Text(
-            stringResource(id = R.string.shop_item_cost_prefix) +
-                    "$cost" +
-                    stringResource(id = R.string.shop_item_cost_suffix),
-            fontSize = 14.sp,
-            style = MaterialTheme.typography.bodySmall
-        )
+
+        if (description != null) {
+            Text(
+                description,
+                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+            )
+        }
+
         if (currentMultiplier != null) {
             Text(
-                stringResource(id = R.string.shop_item_multiplier_prefix) + "$currentMultiplier",
+                // Hier gehen wir davon aus, dass R.string.shop_item_multiplier_prefix bereits ein Leerzeichen am Ende hat ODER wir fügen es hier hinzu.
+                // Um sicherzugehen, explizit hinzufügen:
+                stringResource(id = R.string.shop_item_multiplier_prefix) + " $currentMultiplier",
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodySmall
             )
         }
-        if (currentProduction != null && isActive == true) { // Zeige Produktion nur an, wenn das Item (Fabrik) aktiv ist
+
+        if (currentProduction != null && isActive == true) {
             Text(
-                stringResource(id = R.string.shop_item_production_prefix) + "$currentProduction" + stringResource(id = R.string.shop_item_production_suffix),
+                stringResource(id = R.string.shop_item_production_prefix) +
+                        " $currentProduction" + // Leerzeichen vor dem Wert
+                        " " + stringResource(id = R.string.shop_item_production_suffix), // Leerzeichen vor dem Suffix
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodySmall
             )
         }
+
         if (isActive != null) {
             Text(
                 if (isActive) stringResource(id = R.string.shop_item_status_active)
@@ -332,38 +342,44 @@ fun ShopItem(
                 color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
-        if (description != null) {
+
+        if (requiresBaseItemActive == true && isActive == false) {
             Text(
-                description,
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-            )
-        }
-        if (requiresBaseItemActive == true && isActive == false) { // Zeige Hinweis nur, wenn Basis-Item fehlt UND das Upgrade selbst noch nicht aktiv ist
-            Text(
-                stringResource(id = R.string.shop_item_requires_base_prefix) + stringResource(id = R.string.shop_item_aerp_factory) + stringResource(id = R.string.shop_item_requires_base_suffix), // Beispiel: "Benötigt: Aerp-Fabrik"
+                stringResource(id = R.string.shop_item_requires_base_prefix) +
+                        " " + stringResource(id = R.string.shop_item_aerp_factory) + // Leerzeichen nach dem Prefix und vor dem Item-Namen
+                        stringResource(id = R.string.shop_item_requires_base_suffix), // Leerzeichen hier nur, wenn Suffix nicht direkt anschließen soll
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
+
+        // Kosten anzeigen
+        Text(
+            stringResource(id = R.string.shop_item_cost_prefix) +  // Prefix
+                    " $cost" +                                       // Leerzeichen vor dem Wert (Zahl)
+                    " " + stringResource(id = R.string.shop_item_cost_suffix), // Leerzeichen vor dem Suffix ("Aerps")
+            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+
         Button(
             onClick = onBuy,
-            enabled = canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive), // Button ist kaufbar, wenn `canAfford` UND (entweder kein `requiresBaseItemActive` vorhanden ODER es nicht `true` ist)
-            modifier = Modifier.fillMaxWidth()
+            enabled = canAfford && (requiresBaseItemActive == null || !requiresBaseItemActive || isActive == true),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
         ) {
             Text(
-                // Logik für den Button-Text anpassen
                 when {
                     isActive == true -> stringResource(id = R.string.shop_item_bought_button)
-                    requiresBaseItemActive == true -> stringResource(id = R.string.shop_item_buy_button_requires_base) // Eigener Text, wenn Basis fehlt
+                    requiresBaseItemActive == true && !gameViewModel.isPassiveScoreGeneratorActive -> stringResource(id = R.string.shop_item_buy_button_requires_base)
                     else -> stringResource(id = R.string.shop_item_buy_button)
                 }
             )
         }
     }
 }
+
 
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, name = "Portrait Preview")

@@ -10,8 +10,8 @@
     <!-- UI.kt - GameScreen -->
     <string name="score_text">Aerps: %1$d</string> <!-- Prefix für den Punktestand -->
     <string name="click_me_button">Bekomme Aerps!</string>
-    <string name="cooldown_auto_clicker_prefix">Auto-Klicker:</string>
-    <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik:</string>
+    <string name="cooldown_auto_clicker_prefix">Auto-Klicker: </string>
+    <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik: </string>
     <string name="cooldown_suffix">s</string> <!-- Suffix für Sekunden -->
 
     <!-- UI.kt - ShopMenu -->
@@ -21,8 +21,8 @@
     <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
 
     <!-- UI.kt - ShopItem -->
-    <string name="shop_item_cost_prefix">Kosten:</string>
-    <string name="shop_item_cost_suffix">Aerps</string>
+    <string name="shop_item_cost_prefix">Kosten: </string>
+    <string name="shop_item_cost_suffix"> Aerps</string>
     <string name="shop_item_multiplier_prefix">Aktueller Multiplikator: x</string>
     <string name="shop_item_status_active">Aktiv</string>
     <string name="shop_item_status_inactive">Inaktiv</string>
@@ -43,12 +43,12 @@
     <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string> <!-- Optional, für den Button-Text -->
 
     <!-- Für die Anzeige der Produktion der Fabrik -->
-    <string name="shop_item_production_prefix">Produktion:</string>
-    <string name="shop_item_production_suffix">Aerps/Zyklus</string>
+    <string name="shop_item_production_prefix">Produktion: </string>
+    <string name="shop_item_production_suffix"> Aerps/Zyklus</string>
 
     <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
-    <string name="shop_item_requires_base_prefix">Benötigt:</string>
-    <string name="shop_item_requires_base_suffix"></string>
+    <string name="shop_item_requires_base_prefix">Benötigt: </string>
+    <string name="shop_item_requires_base_suffix"> </string>
 
     <!-- Aktualisierte Beschreibungen für die Aerp-Fabrik -->
     <string name="shop_item_aerp_factory_description_active">Produziert %1$d Aerps pro Zyklus.</string>
