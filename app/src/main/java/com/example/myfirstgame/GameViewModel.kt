@@ -75,11 +75,24 @@ class GameViewModel : ViewModel() {
     init {
         updateDisplayedScore() // Initialen Anzeigewert setzen
     }
-    fun onAerpClicked() { // Der Score wird als Int addiert, clickMultiplier ist jetzt Double
-        internalScore += clickMultiplier.roundToInt() // Runden auf den nächsten Integer für die Score-Anzeige
-        updateDisplayedScore()
+
+    // In GameViewModel.kt
+    private var lastUiUpdateTime = 0L
+    private val uiUpdateInterval = 100L // Millisekunden, z.B. 100ms = 10 UI-Updates pro Sekunde
+    fun onAerpClicked() {
+        internalScore += clickMultiplier.roundToInt()
+        // Aktualisiere displayedScore nur periodisch
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastUiUpdateTime > uiUpdateInterval) {
+            updateDisplayedScore()
+            lastUiUpdateTime = currentTime
+        }
+        // Wenn das Spiel beendet wird oder an bestimmten Punkten, stelle sicher, dass der letzte Score angezeigt wird:
+        // z.B. in onCleared() oder wenn die App in den Hintergrund geht, updateDisplayedScore() einmal final aufrufen.
     }
-        // Double Click
+
+
+    // Double Click
     fun buyClickBoostUpgrade() {
         if (internalScore >= clickBoostCost) {
            internalScore -= clickBoostCost
@@ -145,64 +158,59 @@ class GameViewModel : ViewModel() {
         effectivePassiveScoreAmount = basePassiveScoreAmount + totalBonus
     }
 
-       // Coroutine für den AutoClicker
-       private fun startAutoClicker() {
-           autoClickJob?.cancel()
-           if (!isAutoClickerActive) { // Sicherstellen, dass der Job nur gestartet wird, wenn er aktiv sein soll
-               autoClickerCooldown = 0
-               return
-           }
-           autoClickJob = viewModelScope.launch {
-               while (isAutoClickerActive) { // Überprüfe weiterhin, ob er aktiv sein soll
-                   // Cooldown für die UI
-                   // Wir verwenden Double für den Cooldown, um Zehntelsekunden anzuzeigen, wenn das Intervall < 1s wird.
-                   // Aber die Schleife selbst läuft in 1-Sekunden-Schritten für den Delay.
-                   // Die Cooldown-Anzeige kann genauer sein, wenn gewünscht.
-                   // Hier vereinfacht: Cooldown in ganzen Sekunden für den Delay, aber das Intervall ist ein Double.
-                   val intervalInWholeSeconds = autoClickerInterval.roundToInt()
-                   for (i in intervalInWholeSeconds downTo 1) {
-                       if (!isAutoClickerActive) break // Beende den Countdown, wenn deaktiviert
-                       autoClickerCooldown = i
-                       delay(1000) // 1 Sekunde warten
-                   }
-                   if (!isAutoClickerActive) { // Erneut prüfen, falls während des Delays deaktiviert
-                       autoClickerCooldown = 0
-                       break
-                   }
-                   autoClickerCooldown = 0
-                   onAerpClicked()
-                   // Warte die exakte Intervallzeit (abzüglich der bereits vergangenen Sekunde des letzten Cooldown-Schritts, falls Intervall > 1s)
-                   // Für Intervalle < 1s oder präzisere Timings könnte man hier komplexere Logik verwenden.
-                   // Einfacher Ansatz: Nach dem Klick erneut den Cooldown-Zyklus starten.
-                   // Die delay(1000) oben sorgt bereits für die Basisfrequenz.
-                   // Wenn autoClickerInterval z.B. 0.5s ist, würde die Schleife oben nicht viel machen,
-                   // und onAerpClicked() würde effektiv alle ~1 Sekunde aufgerufen. Das muss angepasst werden.
+    // Coroutine für den AutoClicker
+    private fun startAutoClicker() {
+        autoClickJob?.cancel()
+        if (!isAutoClickerActive || autoClickerInterval <= 0) { // Zusätzliche Prüfung für Intervall
+            autoClickerCooldown = 0
+            return
+        }
 
-                   // Überarbeitete Logik für den Delay basierend auf dem Double-Intervall:
-                   if (autoClickerInterval > 0) {
-                       val delayMillis = (autoClickerInterval * 1000).toLong()
-                       // Cooldown-Anzeige für die UI (optional detaillierter)
-                       var remainingCooldown = autoClickerInterval
-                       while (remainingCooldown > 0) {
-                           if (!isAutoClickerActive) break
-                           autoClickerCooldown = remainingCooldown.roundToInt() // Für die UI-Anzeige
-                           val currentDelay = minOf(1000L, (remainingCooldown * 1000).toLong())
-                           delay(currentDelay)
-                           remainingCooldown -= currentDelay / 1000.0
-                       }
-                       if (!isAutoClickerActive) {
-                           autoClickerCooldown = 0
-                           break
-                       }
-                       autoClickerCooldown = 0
-                       // onAerpClicked() wird jetzt nur einmal pro Zyklus nach dem Delay aufgerufen
-                   }
-               }
-               if (!isAutoClickerActive) {
-                   autoClickerCooldown = 0
-               }
-           }
-       }
+        autoClickJob = viewModelScope.launch {
+            while (isAutoClickerActive) {
+                // UI Cooldown-Anzeige (optional und vereinfacht für kurze Intervalle)
+                // Bei sehr kurzen Intervallen ist eine sekundengenaue Anzeige nicht mehr sinnvoll.
+                // Man könnte den Cooldown hier direkt auf 0 setzen oder eine andere Logik verwenden.
+                // Für dieses Beispiel lassen wir es vorerst einfacher.
+                autoClickerCooldown = autoClickerInterval.roundToInt() // Setze Cooldown einmal grob
+                if (autoClickerCooldown < 1) autoClickerCooldown =
+                    1 // Mindestens 1s anzeigen, wenn überhaupt
+
+                // Der eigentliche Delay
+                val delayMillis = (autoClickerInterval * 1000).toLong()
+                if (delayMillis <= 0) break // Sicherheitsabbruch, falls Intervall zu klein wird
+
+                // Update Cooldown über die Dauer des Delays (optional, kann Performance kosten)
+                // Wenn du eine laufende Cooldown-Anzeige möchtest:
+                var timePassed = 0L
+                val updateInterval = 100L // Aktualisiere die UI alle 100ms für den Cooldown
+                while (timePassed < delayMillis) {
+                    if (!isAutoClickerActive) break // Aus der inneren Schleife ausbrechen
+                    val remaining = delayMillis - timePassed
+                    autoClickerCooldown = (remaining / 1000.0).roundToInt().coerceAtLeast(0)
+                    delay(minOf(updateInterval, remaining.coerceAtLeast(0)))
+                    timePassed += updateInterval
+                }
+
+                if (!isAutoClickerActive) { // Erneut prüfen nach der Cooldown-Schleife
+                    autoClickerCooldown = 0
+                    break // Aus der äußeren while-Schleife ausbrechen
+                }
+
+                autoClickerCooldown = 0
+                onAerpClicked() // Klick ausführen
+
+                // Kurzer zusätzlicher Delay, um dem System etwas Luft zu geben, falls das Intervall extrem klein ist.
+                // Dies ist ein Workaround und sollte idealerweise durch eine bessere Begrenzung der Klickrate ersetzt werden.
+                if (delayMillis < 50) { // z.B. wenn Intervall unter 50ms ist
+                    delay(50 - delayMillis)
+                }
+            }
+            if (!isAutoClickerActive) {
+                autoClickerCooldown = 0
+            }
+        }
+    }
 
 
     // Coroutine für den passiven Score Generator
