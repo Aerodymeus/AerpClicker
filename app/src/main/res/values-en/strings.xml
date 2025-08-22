@@ -24,7 +24,6 @@
         <!-- UI.kt - ShopItem -->
         <string name="shop_item_cost_prefix">Cost: </string>
         <string name="shop_item_cost_suffix"> Aerps</string>
-        <string name="shop_item_multiplier_prefix">Current Multiplier: x</string>
         <string name="shop_item_status_active">Active</string>
         <string name="shop_item_status_inactive">Inactive</string>
         <string name="shop_item_buy_button">Buy</string>
@@ -33,11 +32,10 @@
         <!-- For the Factory Upgrade Item -->
         <string name="shop_item_factory_upgrade">Factory Booster</string>
         <string name="shop_item_factory_upgrade_description_active">The factory is now producing additional Aerps!</string>
-    <string name="shop_item_factory_upgrade_description_available">Increases your factory\'s production by another 5 Aerps per cycle.</string>        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
+        <string name="shop_item_factory_upgrade_description_available">Increases your factory\'s production by another 5 Aerps per cycle.</string>        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
         <string name="shop_item_buy_button_requires_base">Buy (Requires Base Item)</string> <!-- Optional, for the button text -->
 
         <!-- For the factory's production display -->
-        <string name="shop_item_production_prefix">Production: </string>
         <string name="shop_item_production_suffix"> Aerps/cycle</string>
 
         <!-- For the hint that a base item is required -->
@@ -50,9 +48,10 @@
 
         <!-- Descriptions for Shop-Items -->
         <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
-        <string name="shop_item_auto_aerper_description">Automatically clicks for you every %1$d seconds.</string>
-    <string name="shop_item_level_prefix">"Level: "</string>
-    <string name="shop_item_upgrade_button">Upgrade</string>
+        <string name="shop_item_auto_aerper_description">Automatically clicks for you every %.1f seconds.</string>
+
+        <string name="shop_item_level_prefix">"Level: "</string>
+        <string name="shop_item_upgrade_button">Upgrade</string>
 
         <!-- For the Click Upgrade (previously "Double Aerps") -->
         <string name="shop_item_click_boost">Aerp Booster</string> <!-- NEW NAME -->
@@ -63,5 +62,11 @@
         <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximum speed reached (%.1fs)!</string>
         <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Requires active Auto-Clicker.</string>
 
+
+    <string name="shop_item_current_interval_prefix">Current Interval: </string>
+    <string name="shop_item_current_interval_suffix">s</string>
+    <string name="shop_item_max_level_button">Max Level</string>
+    <string name="shop_item_multiplier_prefix">Current Bonus: </string>
+    <string name="shop_item_production_prefix">Production: </string>
 
 </resources>

@@ -1,6 +1,7 @@
 package com.example.myfirstgame // Or the correct package
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,7 +17,7 @@ import kotlin.math.max
 
 class GameViewModel : ViewModel() {
     // UI State
-    private var internalScore by mutableStateOf(0.0) // Interner Score als Double
+    private var internalScore by mutableDoubleStateOf(0.0) // Interner Score als Double
     var displayedScore by mutableIntStateOf(0)       // Score für die UI als Int
         private set
 
@@ -24,7 +25,7 @@ class GameViewModel : ViewModel() {
     private fun updateDisplayedScore() {
         displayedScore = internalScore.roundToInt()
     }
-    var clickMultiplier by mutableStateOf(1.0) // Startwert als Double
+    var clickMultiplier by mutableDoubleStateOf(1.0) // Startwert als Double
         private set
     var clickBoostCost by mutableIntStateOf(50) // Umbenannt von doubleClickCost
         private set
@@ -36,9 +37,9 @@ class GameViewModel : ViewModel() {
             // Auto-Clicker
     var autoClickerCost by mutableIntStateOf(100)
         private set
-    var autoClickerCooldown by mutableIntStateOf(0)
+    var autoClickerCooldown by mutableDoubleStateOf(0.0)
         private set
-    var autoClickerInterval by mutableStateOf(10.0) // Sekunden, jetzt veränderbar
+    var autoClickerInterval by mutableDoubleStateOf(10.0) // Sekunden, jetzt veränderbar
         private set
     val minAutoClickerInterval = 0.5 // Minimal erlaubtes Intervall (z.B. 0.5 Sekunden)
     private val autoClickerIntervalReduction = 0.1 // Senkung pro Upgrade
@@ -52,7 +53,7 @@ class GameViewModel : ViewModel() {
     var passiveScoreGeneratorCost by mutableIntStateOf(100) // Kosten für den passiven Generator
         private set
     private val basePassiveScoreAmount = 5.0 // Basis-Score für den passiven Generator
-    var effectivePassiveScoreAmount by mutableStateOf(basePassiveScoreAmount) // Ist jetzt Double
+    var effectivePassiveScoreAmount by mutableDoubleStateOf(basePassiveScoreAmount) // Ist jetzt Double
         private set
     var passiveGeneratorCooldown by mutableIntStateOf(0)
         private set
@@ -78,7 +79,7 @@ class GameViewModel : ViewModel() {
     private var lastUiUpdateTime = 0L
     private val uiUpdateInterval = 100L // Millisekunden, z.B. 100ms = 10 UI-Updates pro Sekunde
     fun onAerpClicked() {
-        internalScore += clickMultiplier.roundToInt()
+        internalScore += clickMultiplier
         // Aktualisiere displayedScore nur periodisch
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastUiUpdateTime > uiUpdateInterval) {
@@ -87,6 +88,12 @@ class GameViewModel : ViewModel() {
         }
         // Wenn das Spiel beendet wird oder an bestimmten Punkten, stelle sicher, dass der letzte Score angezeigt wird:
         // z.B. in onCleared() oder wenn die App in den Hintergrund geht, updateDisplayedScore() einmal final aufrufen.
+    }
+
+    // Call updateDisplayedScore() explicitly after purchases or significant score changes
+    private fun handleScoreChangeWithImmediateUpdate() {
+        updateDisplayedScore()
+        lastUiUpdateTime = System.currentTimeMillis() // Reset timer after explicit update
     }
 
 
@@ -160,52 +167,44 @@ class GameViewModel : ViewModel() {
     private fun startAutoClicker() {
         autoClickJob?.cancel()
         if (!isAutoClickerActive || autoClickerInterval <= 0) { // Zusätzliche Prüfung für Intervall
-            autoClickerCooldown = 0
+            autoClickerCooldown = 0.0
             return
         }
 
         autoClickJob = viewModelScope.launch {
             while (isAutoClickerActive) {
-                // UI Cooldown-Anzeige (optional und vereinfacht für kurze Intervalle)
-                // Bei sehr kurzen Intervallen ist eine sekundengenaue Anzeige nicht mehr sinnvoll.
-                // Man könnte den Cooldown hier direkt auf 0 setzen oder eine andere Logik verwenden.
-                // Für dieses Beispiel lassen wir es vorerst einfacher.
-                autoClickerCooldown = autoClickerInterval.roundToInt() // Setze Cooldown einmal grob
-                if (autoClickerCooldown < 1) autoClickerCooldown =
-                    1 // Mindestens 1s anzeigen, wenn überhaupt
-
-                // Der eigentliche Delay
                 val delayMillis = (autoClickerInterval * 1000).toLong()
                 if (delayMillis <= 0) break // Sicherheitsabbruch, falls Intervall zu klein wird
 
                 // Update Cooldown über die Dauer des Delays (optional, kann Performance kosten)
                 // Wenn du eine laufende Cooldown-Anzeige möchtest:
-                var timePassed = 0L
-                val updateInterval = 100L // Aktualisiere die UI alle 100ms für den Cooldown
-                while (timePassed < delayMillis) {
+                var timePassedMillis = 0L
+                val uiUpdateRate = 100L // Aktualisiere die UI alle 100ms für den Cooldown
+                while (timePassedMillis < delayMillis) {
                     if (!isAutoClickerActive) break // Aus der inneren Schleife ausbrechen
-                    val remaining = delayMillis - timePassed
-                    autoClickerCooldown = (remaining / 1000.0).roundToInt().coerceAtLeast(0)
-                    delay(minOf(updateInterval, remaining.coerceAtLeast(0)))
-                    timePassed += updateInterval
+                    val remainingMillis = delayMillis - timePassedMillis
+                    autoClickerCooldown = remainingMillis / 1000.0
+                    val currentLoopDelay = minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0))
+                    delay(currentLoopDelay)
+                    timePassedMillis += currentLoopDelay
                 }
 
                 if (!isAutoClickerActive) { // Erneut prüfen nach der Cooldown-Schleife
-                    autoClickerCooldown = 0
+                    autoClickerCooldown = 0.0
                     break // Aus der äußeren while-Schleife ausbrechen
                 }
 
-                autoClickerCooldown = 0
+                autoClickerCooldown = 0.0
                 onAerpClicked() // Klick ausführen
 
                 // Kurzer zusätzlicher Delay, um dem System etwas Luft zu geben, falls das Intervall extrem klein ist.
                 // Dies ist ein Workaround und sollte idealerweise durch eine bessere Begrenzung der Klickrate ersetzt werden.
-                if (delayMillis < 50) { // z.B. wenn Intervall unter 50ms ist
-                    delay(50 - delayMillis)
-                }
+//                if (delayMillis < 50) { // z.B. wenn Intervall unter 50ms ist
+//                    delay(50 - delayMillis)
+//                }
             }
             if (!isAutoClickerActive) {
-                autoClickerCooldown = 0
+                autoClickerCooldown = 0.0
             }
         }
     }
@@ -237,5 +236,6 @@ class GameViewModel : ViewModel() {
         super.onCleared()
         autoClickJob?.cancel()
         passiveScoreJob?.cancel() // Den neuen Job ebenfalls aufräumen
+        updateDisplayedScore() // Ensure final score is displayed
     }
 }

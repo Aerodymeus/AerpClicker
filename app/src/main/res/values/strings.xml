@@ -23,8 +23,7 @@
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten: </string>
     <string name="shop_item_cost_suffix"> Aerps</string>
-    <string name="shop_item_multiplier_prefix">Aktueller Multiplikator: x</string>
-    <string name="shop_item_status_active">Aktiv</string>
+    <string name="shop_item_status_active">Aktive</string>
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
@@ -42,7 +41,7 @@
     <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string> <!-- Optional, für den Button-Text -->
 
     <!-- Für die Anzeige der Produktion der Fabrik -->
-    <string name="shop_item_production_prefix">Produktion: </string>
+
     <string name="shop_item_production_suffix"> Aerps/Zyklus</string>
 
     <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
@@ -53,7 +52,7 @@
 
     <!-- Beschreibungen für Shop-Items -->
     <string name="shop_item_double_aerps_description">"Verdoppelt die Anzahl der Aerps, die du pro Klick erhältst.     "</string>
-    <string name="shop_item_auto_aerper_description">"Klickt automatisch alle %1$d Sekunden für dich.\n    "</string>
+    <string name="shop_item_auto_aerper_description">Klickt automatisch alle %.1f Sekunden für dich.</string>
     <!-- ... alle anderen strings ... -->
 
     <!-- NEUE STRINGS FÜR MEHRFACHEN KAUF -->
@@ -76,7 +75,13 @@
         Auto-Klicker.
     </string>
 
-
+    <string name="shop_item_current_interval_prefix">Aktuelles Intervall: </string>
+    <string name="shop_item_current_interval_suffix">s</string>
+    <string name="shop_item_max_level_button">Max. Level</string>
+    <!-- Stelle sicher, dass shop_item_multiplier_prefix und shop_item_production_prefix nur Text sind,
+             da die Formatierung in UI.kt erfolgt -->
+    <string name="shop_item_multiplier_prefix">Aktueller Bonus: </string> <!-- Beispiel: x%.2f wäre falsch, wenn die Zahl in UI.kt formatiert wird -->
+    <string name="shop_item_production_prefix">Produktion: </string>
 
 
 </resources>

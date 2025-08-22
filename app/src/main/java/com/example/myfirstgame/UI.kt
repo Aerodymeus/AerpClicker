@@ -27,7 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration // Import für LocalConfiguration
-//import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource // Import für stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview // Import für Preview
@@ -35,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
+
 
 
 class UI : ComponentActivity() {
@@ -87,7 +86,7 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
     }
 }
 
-@SuppressLint("StringFormatMatches") // Nötig für die Formatierung des Multiplikators
+@SuppressLint("StringFormatMatches", "DefaultLocale") // Nötig für die Formatierung des Multiplikators
 @Composable
 fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
     val configuration = LocalConfiguration.current
@@ -127,10 +126,10 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         ) {
             if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
                 // Zeige das aktuelle Intervall vielleicht auch hier an, oder nur den Cooldown
-                val intervalText = String.format("%.1f", gameViewModel.autoClickerInterval) // Formatiere das Double
+                val cooldownText = String.format("%.1f", gameViewModel.autoClickerCooldown) // Formatiere das Double
                 Text(
                     text = stringResource(id = R.string.cooldown_auto_clicker_prefix) +
-                            "${gameViewModel.autoClickerCooldown}s (Ziel: ${intervalText}s)", // Beispielhafte Anzeige
+                            " $cooldownText" + stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -226,7 +225,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             isActive = gameViewModel.isAutoClickerActive,
             onBuy = { gameViewModel.buyAutoClickerUpgrade() },
             canAfford = gameViewModel.displayedScore >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive,
-            description = stringResource(id = R.string.shop_item_auto_aerper_description, gameViewModel.autoClickerInterval.roundToInt()), // oder .toInt()
+            description = stringResource(id = R.string.shop_item_auto_aerper_description, gameViewModel.autoClickerInterval),
             cost = gameViewModel.autoClickerCost
         ),
         ShopItemData(
@@ -257,8 +256,8 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             description = if (gameViewModel.isPassiveScoreGeneratorActive) {
                 stringResource(id = R.string.shop_item_aerp_factory_description_active, gameViewModel.effectivePassiveScoreAmount)
             } else {
-                stringResource(id = R.string.shop_item_aerp_factory_description_inactive, gameViewModel.effectivePassiveScoreAmount) // Zeige hier den Basiswert an, was die Fabrik produzieren WÜRDE
-            },
+                stringResource(id = R.string.shop_item_aerp_factory_description_inactive, gameViewModel.effectivePassiveScoreAmount)
+                   },
             cost = gameViewModel.passiveScoreGeneratorCost
         ),
         ShopItemData(
@@ -340,20 +339,23 @@ fun ShopItem(
 
         /// Anzeige für Klick-Multiplikator
         if (currentMultiplier != null && currentLevel != null && currentLevel > 0 && name == stringResource(id = R.string.shop_item_click_boost)) {
-            val formattedMultiplier = String.format("%.2fx", currentMultiplier)
+            val formattedMultiplier = String.format("%.2f", currentMultiplier) // Multiplikator als Double formatieren
             Text(
-                text = "Aktueller Bonus: $formattedMultiplier",
+                // "Aktueller Bonus: %.2fx"
+                text = stringResource(id = R.string.shop_item_multiplier_prefix) + formattedMultiplier,
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
         // NEU: Anzeige für aktuelles Auto-Clicker Intervall
-        if (currentInterval != null && name == stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade)) {
-            if (gameViewModel.isAutoClickerActive) { // Zeige nur an, wenn der Basis-Autoklicker aktiv ist
-                val formattedInterval = String.format("%.1fs", currentInterval)
+        if (currentInterval != null &&
+            (name == stringResource(id = R.string.shop_item_auto_aerper) || name == stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade))) {
+            if (gameViewModel.isAutoClickerActive) {
+                val formattedInterval = String.format("%.1f", currentInterval)
                 Text(
-                    text = "Aktuelles Intervall: $formattedInterval",
+                    // String-Ressource für "Aktuelles Intervall: %.1fs"
+                    text = stringResource(id = R.string.shop_item_current_interval_prefix) + formattedInterval + stringResource(id = R.string.shop_item_current_interval_suffix),
                     fontSize = 14.sp,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(bottom = 4.dp)
@@ -382,19 +384,10 @@ fun ShopItem(
 
         // Anzeige der Produktion der Fabrik (gerundet)
         if (currentProduction != null && name == stringResource(id = R.string.shop_item_aerp_factory) && isActive == true) {
+            val formattedProduction = String.format("%.1f", currentProduction) // Produktion als Double formatieren
             Text(
                 stringResource(id = R.string.shop_item_production_prefix) +
-                        " ${currentProduction.roundToInt()}" + // Runden für die Anzeige
-                        stringResource(id = R.string.shop_item_production_suffix),
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-        }
-        if (currentProduction != null && name == stringResource(id = R.string.shop_item_aerp_factory) && isActive == true) {
-            Text(
-                stringResource(id = R.string.shop_item_production_prefix) +
-                        " ${currentProduction.roundToInt()}" +
+                        formattedProduction + // Verwende den formatierten Wert
                         stringResource(id = R.string.shop_item_production_suffix),
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodySmall,
@@ -402,15 +395,15 @@ fun ShopItem(
             )
         }
 
+
         // Button-Logik
-        val buttonEnabled = when {
-            // Für das Basis AutoClicker Item: kann nur gekauft werden, wenn noch nicht aktiv und genug Aerps
-            name == stringResource(id = R.string.shop_item_auto_aerper) -> canAfford && isActive == false
+        val buttonEnabled = when (// Für das Basis AutoClicker Item: kann nur gekauft werden, wenn noch nicht aktiv und genug Aerps
+            name) {
+            stringResource(id = R.string.shop_item_auto_aerper) -> canAfford && isActive == false
             // Für das Basis AerpFactory Item: kann nur gekauft werden, wenn noch nicht aktiv und genug Aerps
-            name == stringResource(id = R.string.shop_item_aerp_factory) -> canAfford && isActive == false
+            stringResource(id = R.string.shop_item_aerp_factory) -> canAfford && isActive == false
             // Für das AutoClicker Intervall Upgrade:
-            name == stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade) ->
-                canAfford && gameViewModel.isAutoClickerActive && gameViewModel.autoClickerInterval > gameViewModel.minAutoClickerInterval
+            stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade) -> canAfford && gameViewModel.isAutoClickerActive && gameViewModel.autoClickerInterval > gameViewModel.minAutoClickerInterval
             // Für andere Items (ClickBoost, FactoryUpgrade)
             else -> canAfford
         }
@@ -444,6 +437,8 @@ fun ShopItem(
 }
 
 
+
+
 @SuppressLint("ViewModelConstructorInComposable")
 @Preview(showBackground = true, name = "Portrait Preview")
 @Composable
@@ -454,6 +449,7 @@ fun DefaultPreviewPortrait() {
         // Beispiel: Fabrik ist aktiv, Upgrade noch nicht
         // previewViewModel.score = 2000
         // previewViewModel.buyPassiveScoreGenerator() // Simuliere den Kauf der Fabrik
+        // Optional: dummyGameViewModel.isAutoClickerActive = true // Für Preview-Zwecke
         AerpClickerApp(gameViewModel = previewViewModel)
     }
 }
