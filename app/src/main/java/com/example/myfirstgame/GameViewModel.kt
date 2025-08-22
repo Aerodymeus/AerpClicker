@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.max
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -41,7 +40,6 @@ class GameViewModel : ViewModel() {
         private set
     var autoClickerInterval by mutableStateOf(10.0) // Sekunden, jetzt veränderbar
         private set
-    private val baseAutoClickerInterval = 10.0 // Ursprüngliches Intervall
     val minAutoClickerInterval = 0.5 // Minimal erlaubtes Intervall (z.B. 0.5 Sekunden)
     private val autoClickerIntervalReduction = 0.1 // Senkung pro Upgrade
     var autoClickerIntervalUpgradeCost by mutableIntStateOf(150) // Startkosten für das Intervall-Upgrade
