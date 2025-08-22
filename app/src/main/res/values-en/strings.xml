@@ -43,7 +43,7 @@
         <string name="shop_item_requires_base_suffix"> </string>
 
         <!-- Updated descriptions for the Aerp Factory -->
-        <string name="shop_item_aerp_factory_description_active">Produces %.1f Aerps per cycle.</string>
+        <string name="shop_item_aerp_factory_description_active">The factory is now producing additional Aerps!</string>
         <string name="shop_item_aerp_factory_description_inactive">Buy a factory that produces %.1f Aerps per cycle.</string>
 
         <!-- Descriptions for Shop-Items -->
@@ -68,5 +68,17 @@
     <string name="shop_item_max_level_button">Max Level</string>
     <string name="shop_item_multiplier_prefix">Current Bonus: </string>
     <string name="shop_item_production_prefix">Production: </string>
+
+    <string name="shop_item_factory_production_upgrade">Production Boost</string>
+    <string name="shop_item_factory_production_upgrade_description_active">The factory now produces an additional %.1f Aerps!</string>
+    <string name="shop_item_factory_production_upgrade_description_available">Increases your factory\'s production by another %.1f Aerps per cycle.</string>
+    <string name="shop_item_factory_production_upgrade_description_requires_factory">You need an Aerp Factory first.</string>
+
+    <string name="shop_item_factory_interval_upgrade">Faster Factory</string>
+    <string name="shop_item_factory_interval_upgrade_description">Reduces Factory interval by 0.1s. Current: %.1fs</string>
+    <string name="shop_item_factory_interval_upgrade_description_max_reached">Maximum speed reached (%.1fs)!</string>
+    <string name="shop_item_factory_interval_upgrade_requires_factory">Requires active Aerp Factory.</string>
+
+    <string name="shop_item_current_bonus_prefix">Current Overall Bonus: </string>
 
 </resources>

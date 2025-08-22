@@ -23,14 +23,14 @@
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten: </string>
     <string name="shop_item_cost_suffix"> Aerps</string>
-    <string name="shop_item_status_active">Aktive</string>
+    <string name="shop_item_status_active">Aktiv</string>
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
 #
     <!-- die Aerp-Fabrik -->
     <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
-    <string name="shop_item_aerp_factory_description_active">Produziert %.1f Aerps pro Zyklus.</string>
+    <string name="shop_item_aerp_factory_description_active">Die Fabrik produziert jetzt zusätzliche Aerps!</string>
     <string name="shop_item_aerp_factory_description_inactive">Kauft eine Fabrik, die %.1f Aerps pro Zyklus produziert.</string>
 
     <!-- Für das Fabrik-Upgrade Item -->
@@ -83,5 +83,16 @@
     <string name="shop_item_multiplier_prefix">Aktueller Bonus: </string> <!-- Beispiel: x%.2f wäre falsch, wenn die Zahl in UI.kt formatiert wird -->
     <string name="shop_item_production_prefix">Produktion: </string>
 
+    <string name="shop_item_factory_production_upgrade">Produktions-Boost</string> <!-- NEUER NAME oder anpassen -->
+    <string name="shop_item_factory_production_upgrade_description_active">Die Fabrik produziert jetzt zusätzliche %.1f Aerps!</string> <!-- Platzhalter für Bonus -->
+    <string name="shop_item_factory_production_upgrade_description_available">Erhöht die Produktion deiner Fabrik um weitere %.1f Aerps pro Zyklus.</string> <!-- Platzhalter für Bonus -->
+    <string name="shop_item_factory_production_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik.</string>
+
+    <string name="shop_item_factory_interval_upgrade">Schnellere Fabrik</string>
+    <string name="shop_item_factory_interval_upgrade_description">Reduziert das Fabrik-Intervall um 0.1s. Aktuell: %.1fs</string>
+    <string name="shop_item_factory_interval_upgrade_description_max_reached">Maximale Geschwindigkeit erreicht (%.1fs)!</string>
+    <string name="shop_item_factory_interval_upgrade_requires_factory">Benötigt aktive Aerp-Fabrik.</string>
+
+    <string name="shop_item_current_bonus_prefix">Aktueller Gesamtbonus: </string>
 
 </resources>
