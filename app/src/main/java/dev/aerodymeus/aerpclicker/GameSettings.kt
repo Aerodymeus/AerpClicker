@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 
 // DataStore-Instanz für die App
@@ -27,4 +28,9 @@ object GameStateKeys {
     val FACTORY_INTERVAL_UPGRADE_LEVEL = intPreferencesKey("factory_interval_upgrade_level")
     // passiveScoreGeneratorCost, factoryProductionUpgradeCost, factoryIntervalUpgradeCost werden abgeleitet
     // effectivePassiveScoreAmount und passiveGeneratorInterval werden von ihren Leveln abgeleitet
+}
+
+object AppThemeKeys {
+    val SELECTED_THEME =
+        stringPreferencesKey("selected_theme") // Speichert "LIGHT", "DARK", oder "SYSTEM"
 }

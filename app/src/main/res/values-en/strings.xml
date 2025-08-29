@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
     <resources>
-        <string name="app_name">Aerp Clicker</string>
-        <string name="get_aerps_text">Get Aerps!</string>
+    <string name="get_aerps_text">Get Aerps!</string>
         <string name="duplicate_aerps_label">Double Aerps</string> <!-- For the app title in the manifest and possibly elsewhere -->
 
         <!-- UI.kt - AerpClickerApp -->
-        <string name="top_bar_title">Aerp Clicker</string>
-        <string name="menu_content_description">Open menu</string>
+    <string name="menu_content_description">Open menu</string>
 
         <!-- UI.kt - GameScreen -->
-        <string name="score_text">Aerps: %1$d</string> <!-- Prefix for the score -->
+    <!-- Prefix for the score -->
         <string name="click_me_button">Get Aerps!</string>
         <string name="cooldown_auto_clicker_prefix">Auto-Clicker: </string>
         <string name="cooldown_aerp_factory_prefix">Aerp Factory: </string>
-        <string name="cooldown_suffix">s</string> <!-- Suffix for seconds -->
+    <!-- Suffix for seconds -->
 
         <!-- UI.kt - ShopMenu -->
         <string name="shop_title">Upgrades</string>
@@ -23,8 +21,7 @@
 
         <!-- UI.kt - ShopItem -->
         <string name="shop_item_cost_prefix">Cost: </string>
-        <string name="shop_item_cost_suffix"> Aerps</string>
-        <string name="shop_item_status_active">Active</string>
+    <string name="shop_item_status_active">Active</string>
         <string name="shop_item_status_inactive">Inactive</string>
         <string name="shop_item_buy_button">Buy</string>
         <string name="shop_item_bought_button">Purchased</string>
@@ -85,5 +82,11 @@
     <string name="exit_dialog_text">Do you want to quit Aerp Clicker?</string>
     <string name="exit_dialog_confirm_button">Quit</string>
     <string name="exit_dialog_dismiss_button">Cancel</string>
+    <string name="options_title">Settings</string>
+    <string name="theme_selection_title">App-Design</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System Default</string>
+    <string name="back_button_description">Back</string>
 
 </resources>
