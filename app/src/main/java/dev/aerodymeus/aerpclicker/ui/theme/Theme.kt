@@ -1,4 +1,4 @@
-package com.example.myfirstgame.ui.theme
+package dev.aerodymeus.aerpclicker.ui.theme
 
 import android.app.Activity
 import android.os.Build

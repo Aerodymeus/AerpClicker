@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    package="dev.aerodymeus.aerpclicker">
 
     <application
         android:allowBackup="true"
@@ -10,12 +10,11 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MyFirstGame">
+        android:theme="@style/Theme.AerpClicker">
         <activity
-            android:name=".UI"
+            android:name="dev.aerodymeus.aerpclicker.UI"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.MyFirstGame">
+            android:theme="@style/Theme.AerpClicker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

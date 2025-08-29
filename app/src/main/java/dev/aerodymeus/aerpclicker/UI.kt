@@ -1,4 +1,4 @@
-package com.example.myfirstgame
+package dev.aerodymeus.aerpclicker
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration // Import für Configuration
@@ -42,7 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import com.example.myfirstgame.ui.theme.AerpClickerTheme
+import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 
 
 class UI : ComponentActivity() {

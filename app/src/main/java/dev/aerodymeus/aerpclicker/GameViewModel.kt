@@ -1,4 +1,4 @@
-package com.example.myfirstgame // Or the correct package
+package dev.aerodymeus.aerpclicker // Or the correct package
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf

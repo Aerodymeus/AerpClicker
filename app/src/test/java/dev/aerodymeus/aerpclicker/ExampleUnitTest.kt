@@ -1,4 +1,4 @@
-package com.example.myfirstgame
+package dev.aerodymeus.aerpclicker
 
 import org.junit.Test
 

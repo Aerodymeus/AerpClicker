@@ -1,4 +1,4 @@
-package com.example.myfirstgame.ui.theme
+package dev.aerodymeus.aerpclicker.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

@@ -1,3 +1,5 @@
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.myfirstgame"
+    namespace = "dev.aerodymeus.aerpclicker"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.myfirstgame"
+        applicationId = "dev.aerodymeus.aerpclicker"
         minSdk = 30
         targetSdk = 36
         versionCode = 1
@@ -28,15 +30,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
     }
+    buildToolsVersion = "36.0.0"
 }
 
 dependencies {
@@ -57,15 +60,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation("androidx.core:core-ktx:1.12.0") // Oder neuere Version
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0") // Oder neuere Version
-    implementation("androidx.activity:activity-compose:1.8.2") // Oder neuere Version
-    implementation(platform("androidx.compose:compose-bom:2024.02.02")) // Oder neuere Version
+    implementation(libs.androidx.core.ktx) // Oder neuere Version
+    implementation(libs.androidx.lifecycle.runtime.ktx) // Oder neuere Version
+    implementation(libs.androidx.activity.compose) // Oder neuere Version
+    implementation(platform(libs.androidx.compose.bom)) // Oder neuere Version
 
         // ... other dependencies
-        implementation("androidx.compose.ui:ui:1.6.0") // Use the latest stable version
-        implementation("androidx.compose.material3:material3:1.2.0") // Or material if you are using Material 2
-        implementation("androidx.compose.ui:ui-tooling-preview:1.6.0")
-        implementation("androidx.activity:activity-compose:1.8.0")
-        implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+        implementation(libs.ui) // Use the latest stable version
+        implementation(libs.material3) // Or material if you are using Material 2
+        implementation(libs.ui.tooling.preview)
+        implementation(libs.androidx.activity.compose)
+        implementation(libs.androidx.lifecycle.viewmodel.compose)
 }
