@@ -43,6 +43,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
+import android.app.Application // Sicherstellen, dass dieser Import da ist
+import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser Import da ist
+
+
 
 
 class UI : ComponentActivity() {
@@ -517,13 +521,21 @@ fun ShopItem(
 @Preview(showBackground = true, name = "Portrait Preview")
 @Composable
 fun DefaultPreviewPortrait() {
-    MaterialTheme {
-        // Für eine bessere Preview könntest du hier einen ViewModel mit bestimmten Zuständen erstellen
-        val previewViewModel = GameViewModel()
-        // Beispiel: Fabrik ist aktiv, Upgrade noch nicht
-        // previewViewModel.score = 2000
-        // previewViewModel.buyPassiveScoreGenerator() // Simuliere den Kauf der Fabrik
-        // Optional: dummyGameViewModel.isAutoClickerActive = true // Für Preview-Zwecke
+    AerpClickerTheme { // Stelle sicher, dass du dein Haupt-Theme verwendest
+        val context = LocalContext.current
+        // Versuche, den echten ApplicationContext zu bekommen, wenn möglich
+        val previewApplication = context.applicationContext as? Application
+            ?: Application() // Fallback auf eine sehr einfache Instanz, wenn der Cast fehlschlägt
+
+        val previewViewModel = GameViewModel(previewApplication)
+
+        // Setze hier Testdaten für die Preview, falls gewünscht
+        // Beispiel: previewViewModel.internalScore = 1234.0
+        // previewViewModel.clickBoostLevel = 2
+        // Wichtig: Du müsstest ggf. interne Funktionen aufrufen, um abgeleitete Werte
+        // (wie Kosten) im ViewModel zu aktualisieren, wenn du Level direkt setzt.
+        // Oder du erstellst eine Hilfsfunktion im ViewModel, um es für Previews zu initialisieren.
+
         AerpClickerApp(gameViewModel = previewViewModel)
     }
 }
@@ -532,9 +544,10 @@ fun DefaultPreviewPortrait() {
 @Preview(showBackground = true, device = "spec:width=640dp,height=360dp,dpi=480", name = "Landscape Preview")
 @Composable
 fun DefaultPreviewLandscape() {
-    MaterialTheme {
-        // Für eine bessere Preview könntest du hier einen ViewModel mit bestimmten Zuständen erstellen
-        val previewViewModel = GameViewModel()
+    AerpClickerTheme {
+        val context = LocalContext.current
+        val previewApplication = context.applicationContext as? Application ?: Application()
+        val previewViewModel = GameViewModel(previewApplication)
         AerpClickerApp(gameViewModel = previewViewModel)
     }
 }

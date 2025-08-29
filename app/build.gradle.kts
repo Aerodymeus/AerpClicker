@@ -66,7 +66,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.core.ktx) // Oder neuere Version
-    implementation(libs.androidx.lifecycle.runtime.ktx) // Oder neuere Version
     implementation(libs.androidx.activity.compose) // Oder neuere Version
     implementation(platform(libs.androidx.compose.bom)) // Oder neuere Version
 
@@ -78,4 +77,7 @@ dependencies {
         implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     implementation(platform(libs.firebase.bom))
+
+    implementation(libs.androidx.datastore.preferences) // Überprüfe die neueste Version
+    implementation(libs.androidx.lifecycle.viewmodel.ktx) // Überprüfe die neueste Version
 }

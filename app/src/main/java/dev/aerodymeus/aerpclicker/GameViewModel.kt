@@ -1,21 +1,25 @@
 package dev.aerodymeus.aerpclicker // Or the correct package
 
+import android.app.Application // Hinzufügen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel // Ändern von ViewModel zu AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first // Hinzufügen
 import kotlinx.coroutines.launch
 import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.max
+import androidx.datastore.preferences.core.edit // Hinzufügen
 
 
-class GameViewModel : ViewModel() {
+class GameViewModel(application: Application) : AndroidViewModel(application) {
+    private val dataStore = getApplication<Application>().applicationContext.gameDataStore
     // UI State
     var internalScore by mutableDoubleStateOf(0.0) // Interner Score als Double
         private set
@@ -90,8 +94,138 @@ class GameViewModel : ViewModel() {
     private val uiUpdateInterval = 100L // Millisekunden, z.B. 100ms = 10 UI-Updates pro Sekunde
 
     init {
-        updateDisplayedScore() // Initialen Anzeigewert setzen
+        // updateDisplayedScore() // Wird jetzt in loadGameData() und handleScoreChangeWithImmediateUpdate() gemacht
+        loadGameData() // Lade den Spielstand beim Start
     }
+
+    //GameSave
+    private fun loadGameData() {
+        viewModelScope.launch {
+            val prefs = dataStore.data.first() // Lese die aktuell gespeicherten Präferenzen
+
+            // Score laden
+            internalScore = prefs[GameStateKeys.INTERNAL_SCORE] ?: 0.0
+            updateDisplayedScore() // UI-Score direkt aktualisieren
+
+            // Click Boost laden und Werte neu berechnen
+            val loadedClickBoostLevel = prefs[GameStateKeys.CLICK_BOOST_LEVEL] ?: 0
+            if (loadedClickBoostLevel > 0) {
+                // Setze Level und berechne Multiplikator und Kosten basierend auf diesem Level
+                // Dies vermeidet das Speichern von abgeleiteten Werten
+                var tempClickMultiplier = baseClickValue
+                var tempClickBoostCost = 50 // Startkosten
+                (0 until loadedClickBoostLevel).forEach { i ->
+                    tempClickMultiplier *= 1.2
+                    tempClickBoostCost = (tempClickBoostCost * 1.5).roundToInt()
+                }
+                clickBoostLevel = loadedClickBoostLevel
+                clickMultiplier = tempClickMultiplier
+                clickBoostCost = tempClickBoostCost
+            } else {
+                // Standardwerte, falls noch nicht gekauft/gelevelt
+                clickBoostLevel = 0
+                clickMultiplier = baseClickValue
+                clickBoostCost = 50
+            }
+
+
+            // Auto-Clicker laden
+            val autoClickerBought = prefs[GameStateKeys.IS_AUTO_CLICKER_BOUGHT] ?: false
+            isAutoClickerActive = autoClickerBought // Setze den Aktiv-Status
+            autoClickerCost = if (autoClickerBought) Int.MAX_VALUE else 100 // Kosten für erneuten Kauf verhindern
+
+            val loadedAutoClickerIntervalLevel = prefs[GameStateKeys.AUTO_CLICKER_INTERVAL_UPGRADE_LEVEL] ?: 0
+            if (loadedAutoClickerIntervalLevel > 0 || autoClickerBought) { // Wenn Basis gekauft oder schon gelevelt
+                var tempAutoClickerInterval = 10.0 // Startintervall
+                var tempAutoClickerIntervalCost = 150 // Startkosten für Upgrade
+                (0 until loadedAutoClickerIntervalLevel).forEach { i ->
+                    tempAutoClickerInterval = max(minAutoClickerInterval, tempAutoClickerInterval - autoClickerIntervalReduction)
+                    tempAutoClickerIntervalCost = (tempAutoClickerIntervalCost * 1.6).roundToInt()
+                }
+                autoClickerIntervalUpgradeLevel = loadedAutoClickerIntervalLevel
+                autoClickerInterval = tempAutoClickerInterval
+                autoClickerIntervalUpgradeCost = tempAutoClickerIntervalCost
+
+                if (isAutoClickerActive) { // Nur starten, wenn Basis gekauft wurde
+                    startAutoClicker()
+                }
+            } else {
+                autoClickerIntervalUpgradeLevel = 0
+                autoClickerInterval = 10.0
+                autoClickerIntervalUpgradeCost = 150
+            }
+
+
+            // Passiven Score Generator (Fabrik) laden
+            val passiveGeneratorBought = prefs[GameStateKeys.IS_PASSIVE_GENERATOR_BOUGHT] ?: false
+            isPassiveScoreGeneratorActive = passiveGeneratorBought
+            passiveScoreGeneratorCost = if (passiveGeneratorBought) Int.MAX_VALUE else 100 // Kosten für erneuten Kauf verhindern
+
+            // Fabrik Produktions-Upgrade laden
+            val loadedFactoryProductionLevel = prefs[GameStateKeys.FACTORY_PRODUCTION_UPGRADE_LEVEL] ?: 0
+            // Initialisiere Kosten und Bonus
+            var tempFactoryProductionUpgradeCost = 150 // Startkosten
+            var tempEffectivePassiveScore = basePassiveScoreAmount
+
+            if (passiveGeneratorBought || loadedFactoryProductionLevel > 0) {
+                (0 until loadedFactoryProductionLevel).forEach { i ->
+                    tempEffectivePassiveScore += factoryProductionBonusPerLevel
+                    tempFactoryProductionUpgradeCost = (tempFactoryProductionUpgradeCost * 1.5).toInt()
+                }
+                factoryProductionUpgradeLevel = loadedFactoryProductionLevel
+                effectivePassiveScoreAmount = tempEffectivePassiveScore
+                factoryProductionUpgradeCost = tempFactoryProductionUpgradeCost
+            } else {
+                factoryProductionUpgradeLevel = 0
+                effectivePassiveScoreAmount = basePassiveScoreAmount
+                factoryProductionUpgradeCost = 150
+            }
+
+
+            // Fabrik Intervall-Upgrade laden
+            val loadedFactoryIntervalLevel = prefs[GameStateKeys.FACTORY_INTERVAL_UPGRADE_LEVEL] ?: 0
+            // Initialisiere Kosten und Intervall
+            var tempPassiveGeneratorInterval = 10.0 // Startintervall
+            var tempFactoryIntervalUpgradeCost = 250 // Startkosten
+
+            if (passiveGeneratorBought || loadedFactoryIntervalLevel > 0) {
+                (0 until loadedFactoryIntervalLevel).forEach { i ->
+                    tempPassiveGeneratorInterval = max(minPassiveGeneratorInterval, tempPassiveGeneratorInterval - passiveGeneratorIntervalReduction)
+                    tempFactoryIntervalUpgradeCost = (tempFactoryIntervalUpgradeCost * 1.7).roundToInt()
+                }
+                factoryIntervalUpgradeLevel = loadedFactoryIntervalLevel
+                passiveGeneratorInterval = tempPassiveGeneratorInterval
+                factoryIntervalUpgradeCost = tempFactoryIntervalUpgradeCost
+            } else {
+                factoryIntervalUpgradeLevel = 0
+                passiveGeneratorInterval = 10.0
+                factoryIntervalUpgradeCost = 250
+            }
+
+            if (isPassiveScoreGeneratorActive) { // Nur starten, wenn Basis gekauft
+                updateEffectivePassiveScoreAmount() // Stelle sicher, dass der Wert aktuell ist
+                startPassiveScoreGenerator()
+            }
+            handleScoreChangeWithImmediateUpdate() // UI final aktualisieren
+        }
+    }
+
+    private fun saveGameData() {
+        viewModelScope.launch {
+            dataStore.edit { preferences ->
+                preferences[GameStateKeys.INTERNAL_SCORE] = internalScore
+                preferences[GameStateKeys.CLICK_BOOST_LEVEL] = clickBoostLevel
+
+                preferences[GameStateKeys.IS_AUTO_CLICKER_BOUGHT] = isAutoClickerActive
+                preferences[GameStateKeys.AUTO_CLICKER_INTERVAL_UPGRADE_LEVEL] = autoClickerIntervalUpgradeLevel
+
+                preferences[GameStateKeys.IS_PASSIVE_GENERATOR_BOUGHT] = isPassiveScoreGeneratorActive
+                preferences[GameStateKeys.FACTORY_PRODUCTION_UPGRADE_LEVEL] = factoryProductionUpgradeLevel
+                preferences[GameStateKeys.FACTORY_INTERVAL_UPGRADE_LEVEL] = factoryIntervalUpgradeLevel
+            }
+        }
+    }
+
 
     // Events
     fun onAerpClicked() {
@@ -102,8 +236,7 @@ class GameViewModel : ViewModel() {
             updateDisplayedScore()
             lastUiUpdateTime = currentTime
         }
-        // Wenn das Spiel beendet wird oder an bestimmten Punkten, stelle sicher, dass der letzte Score angezeigt wird:
-        // z.B. in onCleared() oder wenn die App in den Hintergrund geht, updateDisplayedScore() einmal final aufrufen.
+        saveGameData()
     }
 
     private fun handleScoreChangeWithImmediateUpdate() {
@@ -119,7 +252,8 @@ class GameViewModel : ViewModel() {
            clickBoostLevel++
            clickMultiplier = baseClickValue * (1.2).pow(clickBoostLevel)
            clickBoostCost = (clickBoostCost * 1.5).roundToInt()
-            handleScoreChangeWithImmediateUpdate()
+           handleScoreChangeWithImmediateUpdate()
+           saveGameData()
         }
     }
             // Auto Click
@@ -127,8 +261,10 @@ class GameViewModel : ViewModel() {
         if (internalScore >= autoClickerCost && !isAutoClickerActive) {
             internalScore -= autoClickerCost
             isAutoClickerActive = true
+            autoClickerCost = Int.MAX_VALUE // Verhindere erneuten Kauf des Basis-Items
             startAutoClicker()
             handleScoreChangeWithImmediateUpdate()
+            saveGameData()
             }
         }
     fun buyAutoClickerIntervalUpgrade() {
@@ -138,9 +274,7 @@ class GameViewModel : ViewModel() {
 
             // Berechne das neue Intervall, stelle sicher, dass es nicht unter das Minimum fällt
             val newInterval = autoClickerInterval - autoClickerIntervalReduction
-            autoClickerInterval =
-                max(minAutoClickerInterval, newInterval) // max stellt sicher, dass es nicht unter minAutoClickerInterval fällt
-
+            autoClickerInterval = max(minAutoClickerInterval, newInterval) // max stellt sicher, dass es nicht unter minAutoClickerInterval fällt
             autoClickerIntervalUpgradeCost = (autoClickerIntervalUpgradeCost * 1.6).roundToInt() // Kostensteigerung
 
             // Wenn der Auto-Clicker bereits aktiv ist, starte ihn mit dem neuen Intervall neu
@@ -148,6 +282,7 @@ class GameViewModel : ViewModel() {
                 startAutoClicker()
             }
             handleScoreChangeWithImmediateUpdate()
+            saveGameData()
         }
     }
 
@@ -157,9 +292,11 @@ class GameViewModel : ViewModel() {
         if (internalScore >= passiveScoreGeneratorCost && !isPassiveScoreGeneratorActive) {
             internalScore -= passiveScoreGeneratorCost
             isPassiveScoreGeneratorActive = true
+            passiveScoreGeneratorCost = Int.MAX_VALUE // Verhindere erneuten Kauf
             updateEffectivePassiveScoreAmount() // Stellt sicher, dass effectivePassiveScoreAmount korrekt ist
             startPassiveScoreGenerator()
             handleScoreChangeWithImmediateUpdate()
+            saveGameData()
         }
     }
             // Fabrik-Upgrade
@@ -171,6 +308,7 @@ class GameViewModel : ViewModel() {
                     factoryProductionUpgradeCost = (factoryProductionUpgradeCost * 1.5).toInt()
                     updateEffectivePassiveScoreAmount()
                     handleScoreChangeWithImmediateUpdate()
+                    saveGameData()
                 }
             }
 
@@ -185,6 +323,7 @@ class GameViewModel : ViewModel() {
                 startPassiveScoreGenerator() // Neu starten mit neuem Intervall
             }
             handleScoreChangeWithImmediateUpdate()
+            saveGameData()
         }
     }
 
@@ -268,6 +407,7 @@ class GameViewModel : ViewModel() {
         super.onCleared()
         autoClickJob?.cancel()
         passiveScoreJob?.cancel() // Den neuen Job ebenfalls aufräumen
+        saveGameData() // Daten speichern
         updateDisplayedScore() // Ensure final score is displayed
     }
 }
