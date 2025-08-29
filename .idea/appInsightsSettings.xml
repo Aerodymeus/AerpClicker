@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="dev.aerodymeus.aerpclicker" />
+                  <option name="mobileSdkAppId" value="1:382057649389:android:da1fd8c7432446918b28e4" />
+                  <option name="projectId" value="aerpclicker" />
+                  <option name="projectNumber" value="382057649389" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

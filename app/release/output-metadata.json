@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.myfirstgame",
+  "applicationId": "dev.aerodymeus.aerpclicker",
   "variantName": "release",
   "elements": [
     {
