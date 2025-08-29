@@ -24,3 +24,8 @@ A simple yet addictive clicker game for Android, developed with Jetpack Compose!
     *   [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) for UI logic and state management
     *   [Material Design 3](https://m3.material.io/) Components
 *   [Gradle](https://gradle.org/) for the build system
+
+
+## 🤖 Beta Testing
+
+* Sign up for Beta Testing: https://appdistribution.firebase.dev/i/c4412158579f3e4b
