@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "382057649389",
+    "project_id": "aerpclicker",
+    "storage_bucket": "aerpclicker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382057649389:android:da1fd8c7432446918b28e4",
+        "android_client_info": {
+          "package_name": "dev.aerodymeus.aerpclicker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7FIis087HbB6QuVG9BSaPnES34TUJguI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
