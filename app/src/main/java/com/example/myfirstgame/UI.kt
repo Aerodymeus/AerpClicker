@@ -41,14 +41,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.material3.AlertDialog
-
+import androidx.compose.material3.ButtonDefaults
+import com.example.myfirstgame.ui.theme.AerpClickerTheme
 
 
 class UI : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AerpClickerApp()
+            AerpClickerTheme {
+                AerpClickerApp()
+            }
         }
     }
 }
@@ -364,13 +367,19 @@ fun ShopItem(
     gameViewModel: GameViewModel
 ) {
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
-        Text(name, fontSize = 18.sp, style = MaterialTheme.typography.titleMedium)
+        Text(
+            name,
+            fontSize = 18.sp,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground // Farbe aus dem Theme verwenden
+        )
 
         if (description != null) {
             Text(
                 description,
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
             )
         }
@@ -483,12 +492,23 @@ fun ShopItem(
         Button(
             onClick = onBuy,
             enabled = buttonEnabled,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary, // Button-Hintergrund
+                contentColor = MaterialTheme.colorScheme.onPrimary    // Button-Textfarbe
+            )
         ) {
             Text(buttonText)
         }
+
+        Icon(
+            imageVector = Icons.Filled.ShoppingCart,
+            contentDescription = stringResource(id = R.string.shop_title),
+            tint = MaterialTheme.colorScheme.primary // Icon-Farbe
+        )
     }
 }
+
 
 
 
