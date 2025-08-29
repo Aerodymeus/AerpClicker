@@ -81,4 +81,9 @@
 
     <string name="shop_item_current_bonus_prefix">Current Overall Bonus: </string>
 
+    <string name="exit_dialog_title">Quit App?</string>
+    <string name="exit_dialog_text">Do you want to quit Aerp Clicker?</string>
+    <string name="exit_dialog_confirm_button">Quit</string>
+    <string name="exit_dialog_dismiss_button">Cancel</string>
+
 </resources>

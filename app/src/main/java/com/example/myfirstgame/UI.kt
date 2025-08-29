@@ -9,17 +9,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -34,6 +34,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
 
 
 
@@ -52,6 +59,45 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    var showExitDialog by remember { mutableStateOf(false) }
+
+
+    // BackHandler für den Drawer (hat höhere Priorität, wenn enabled)
+    BackHandler(enabled = drawerState.isOpen, onBack = {
+        scope.launch {
+            drawerState.close()
+        }
+    })
+
+    // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
+    BackHandler(enabled = drawerState.isClosed && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
+        showExitDialog = true
+    }
+
+    if (showExitDialog) {
+        val currentActivity = LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false }, // Dialog schließen, wenn außerhalb geklickt wird
+            title = { Text(stringResource(id = R.string.exit_dialog_title)) },
+            text = { Text(stringResource(id = R.string.exit_dialog_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitDialog = false
+                    currentActivity?.finish() // Sicheres Aufrufen von finish()
+                }) {
+                    Text(stringResource(id = R.string.exit_dialog_confirm_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(stringResource(id = R.string.exit_dialog_dismiss_button))
+                }
+            }
+        )
+    }
+
+
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -64,15 +110,17 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel()) {
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(id = R.string.top_bar_title)) },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.apply {
-                                    if (isClosed) open() else close()
-                                }
-                            }
-                        }) {
-                            Icon(Icons.Filled.Menu, contentDescription = stringResource(id = R.string.menu_content_description))
+                    actions = {
+                        TextButton(
+                            onClick = { scope.launch { drawerState.open() } },
+                            modifier = Modifier.padding(end = 8.dp) // Etwas Abstand zum Rand
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.ShoppingCart, // Oder Icons.Filled.Store
+                                contentDescription = stringResource(id = R.string.shop_title)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(stringResource(id = R.string.shop_title).uppercase()) // SHOP in Großbuchstaben für mehr Betonung
                         }
                     }
                 )
@@ -145,7 +193,9 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
 
     if (isLandscape) {
         Row(
-            modifier = modifier.fillMaxSize().padding(horizontal = 8.dp),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
@@ -153,7 +203,9 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
         }
     } else { // Portrait
         Column(
-            modifier = modifier.fillMaxSize().padding(16.dp),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
@@ -268,7 +320,9 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         )
     )
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)) {
         Text(stringResource(id = R.string.shop_title), fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             items(shopItemsList) { itemData ->

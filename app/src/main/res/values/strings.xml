@@ -95,4 +95,9 @@
 
     <string name="shop_item_current_bonus_prefix">Aktueller Gesamtbonus: </string>
 
+    <string name="exit_dialog_title">App beenden?</string>
+    <string name="exit_dialog_text">Möchtest du Aerp Clicker wirklich beenden?</string>
+    <string name="exit_dialog_confirm_button">Beenden</string>
+    <string name="exit_dialog_dismiss_button">Abbrechen</string>
+
 </resources>
