@@ -33,8 +33,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+            // Du könntest hier auch andere Kotlin-Compiler-Optionen setzen, falls nötig
+            // z.B. freeCompilerArgs.add("-Xopt-in=kotlin.RequiresOptIn")
+        }
     }
     buildFeatures {
         compose = true
