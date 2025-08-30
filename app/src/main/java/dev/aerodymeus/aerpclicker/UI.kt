@@ -52,6 +52,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser Import da ist
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.OutlinedButton
+
 
 enum class ThemeSetting {
     SYSTEM, LIGHT, DARK
@@ -74,65 +76,109 @@ class UI : ComponentActivity() {
     }
 }
 
-
-
 @Composable
 fun OptionsScreen(
     modifier: Modifier = Modifier,
     themeViewModel: ThemeViewModel,
+    gameViewModel: GameViewModel,
     currentThemeSetting: ThemeSetting // Den aktuellen Wert direkt empfangen
 ) {
-   Column(
-       modifier = modifier
-           .fillMaxSize()
-           .padding(16.dp),
-       horizontalAlignment = Alignment.CenterHorizontally
-   ) {
-       Text(
-           text = stringResource(R.string.options_title), // String Ressource erstellen
-           style = MaterialTheme.typography.headlineSmall,
-           modifier = Modifier.padding(bottom = 24.dp)
-       )
+    var showResetConfirmationDialog by remember { mutableStateOf(false) }
 
-       Text(
-           text = stringResource(R.string.theme_selection_title), // String Ressource erstellen
-           style = MaterialTheme.typography.titleMedium,
-           modifier = Modifier.padding(bottom = 8.dp)
-       )
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.options_title), // String Ressource erstellen
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(bottom = 24.dp)
+        )
 
-                // Radio Buttons für Theme-Auswahl
-                ThemeSetting.entries.forEach { setting -> // ThemeSetting.values() für ältere Kotlin-Versionen
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = (currentThemeSetting == setting),
-                                onClick = { themeViewModel.setThemeSetting(setting) }
-                            )
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (currentThemeSetting == setting),
-                            onClick = { themeViewModel.setThemeSetting(setting) }
-                        )
-                        Text(
-                            text = when (setting) {
-                                ThemeSetting.LIGHT -> stringResource(R.string.theme_light) // String Ressource
-                                ThemeSetting.DARK -> stringResource(R.string.theme_dark)   // String Ressource
-                                ThemeSetting.SYSTEM -> stringResource(R.string.theme_system) // String Ressource
-                            },
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
-                        )
-                    }
-                }
+        Text(
+            text = stringResource(R.string.theme_selection_title), // String Ressource erstellen
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-                // Hier könntest du weitere Optionen hinzufügen
-                // Spacer(Modifier.height(24.dp))
-                // Text("Weitere Option...")
+        // Radio Buttons für Theme-Auswahl
+        ThemeSetting.entries.forEach { setting -> // ThemeSetting.values() für ältere Kotlin-Versionen
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .selectable(
+                        selected = (currentThemeSetting == setting),
+                        onClick = { themeViewModel.setThemeSetting(setting) }
+                    )
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = (currentThemeSetting == setting),
+                    onClick = { themeViewModel.setThemeSetting(setting) }
+                )
+                Text(
+                    text = when (setting) {
+                        ThemeSetting.LIGHT -> stringResource(R.string.theme_light) // String Ressource
+                        ThemeSetting.DARK -> stringResource(R.string.theme_dark)   // String Ressource
+                        ThemeSetting.SYSTEM -> stringResource(R.string.theme_system) // String Ressource
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
             }
         }
+
+        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
+
+        Text(
+            text = stringResource(R.string.game_data_title), // Neuer Titel für Spieldaten-Optionen
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        OutlinedButton( // Oder Button, je nach gewünschtem Stil
+            onClick = { showResetConfirmationDialog = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.reset_game_progress_button))
+        }
+
+        // Bestätigungsdialog für das Zurücksetzen des Spielstands
+        if (showResetConfirmationDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetConfirmationDialog = false },
+                title = { Text(stringResource(R.string.reset_dialog_title)) },
+                text = { Text(stringResource(R.string.reset_dialog_message)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            gameViewModel.resetGameProgress() // Funktion im ViewModel aufrufen
+                            showResetConfirmationDialog = false
+                            // Optional: Navigiere zum GameScreen oder zeige eine Toast-Nachricht
+                            // z.B. currentScreen = Screen.Game (wenn du Zugriff auf currentScreen hast)
+                            // oder eine Snackbar anzeigen
+                        }
+                    ) {
+                        Text(stringResource(R.string.reset_dialog_confirm_button))
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showResetConfirmationDialog = false }
+                    ) {
+                        Text(stringResource(R.string.reset_dialog_dismiss_button))
+                    }
+                }
+            )
+            // Hier könntest du weitere Optionen hinzufügen
+            // Spacer(Modifier.height(24.dp))
+            // Text("Weitere Option...")
+        }
+    }
+}
 
 @SuppressLint("StringFormatMatches", "DefaultLocale") // Nötig für die Formatierung des Multiplikators
 @Composable
@@ -506,8 +552,142 @@ fun ShopItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AerpClickerApp(
+    gameViewModel: GameViewModel = viewModel(),
+    themeViewModel: ThemeViewModel = viewModel()
+) {
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    var showExitDialog by remember { mutableStateOf(false) }
+    val currentTheme by themeViewModel.currentThemeSetting.collectAsState()
+
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) } // Zustand für aktuellen Screen
+
+    // Wende das Theme dynamisch an
+    AerpClickerTheme(
+        darkTheme = when (currentTheme) {
+            ThemeSetting.LIGHT -> false
+            ThemeSetting.DARK -> true
+            ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+        }
+    ) {
+
+            // Back-Handler Logik
+            BackHandler(enabled = drawerState.isOpen && currentScreen == Screen.Game) { // Nur für Drawer im GameScreen        scope.launch {
+                scope.launch {
+                    drawerState.close()
+                }
+            }
+            BackHandler(enabled = currentScreen == Screen.Options) { // Zurück vom OptionsScreen zum GameScreen
+                currentScreen = Screen.Game
+            }
+            // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
+            BackHandler(enabled = drawerState.isClosed && currentScreen == Screen.Game && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
+                showExitDialog = true
+            }
+
+            if (showExitDialog) {
+                val currentActivity =
+                    LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
+                AlertDialog(
+                    onDismissRequest = {
+                        showExitDialog = false
+                    }, // Dialog schließen, wenn außerhalb geklickt wird
+                    title = { Text(stringResource(id = R.string.exit_dialog_title)) },
+                    text = { Text(stringResource(id = R.string.exit_dialog_text)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showExitDialog = false
+                            currentActivity?.finish() // Sicheres Aufrufen von finish()
+                        }) {
+                            Text(stringResource(id = R.string.exit_dialog_confirm_button))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showExitDialog = false }) {
+                            Text(stringResource(id = R.string.exit_dialog_dismiss_button))
+                        }
+                    }
+                )
+            }
 
 
+
+            ModalNavigationDrawer(
+                drawerState = drawerState,
+                gesturesEnabled = currentScreen == Screen.Game, // Drawer nur im GameScreen öffnen
+                drawerContent = {
+                    ModalDrawerSheet {
+                        ShopMenu(gameViewModel = gameViewModel)
+                    }
+                }
+            ) {
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text(stringResource(id = R.string.top_bar_title)) },
+                            navigationIcon = {
+                                when (currentScreen) {
+                                    Screen.Game -> {
+                                        // Options-Icon auf der linken Seite im GameScreen
+                                        IconButton(onClick = { currentScreen = Screen.Options }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Settings,
+                                                contentDescription = stringResource(R.string.options_title)
+                                            )
+                                        }
+                                    }
+
+                                    Screen.Options -> {
+                                        // Zurück-Icon auf der linken Seite im OptionsScreen
+                                        IconButton(onClick = { currentScreen = Screen.Game }) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = stringResource(R.string.back_button_description)
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            actions = {
+                                // Shop-Button nur im GameScreen und jetzt allein in den Actions auf der rechten Seite
+                                if (currentScreen == Screen.Game) {
+                                    TextButton(
+                                        onClick = { scope.launch { drawerState.open() } }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.ShoppingCart,
+                                            contentDescription = stringResource(id = R.string.shop_title)
+                                        )
+                                        Spacer(Modifier.width(4.dp))
+                                        Text(stringResource(id = R.string.shop_title).uppercase())
+                                    }
+                                }
+                                // Optional: Wenn du noch andere Icons rechts haben möchtest, kämen sie hierher.
+                            }
+                        )
+                    }
+                ) { paddingValues ->
+                    // Wechsle den angezeigten Inhalt basierend auf currentScreen
+                    when (currentScreen) {
+                        is Screen.Game -> GameScreen(
+                            modifier = Modifier.padding(paddingValues),
+                            gameViewModel = gameViewModel
+                        )
+
+                        is Screen.Options -> OptionsScreen(
+                            modifier = Modifier.padding(paddingValues),
+                            themeViewModel = themeViewModel,
+                            gameViewModel = gameViewModel,
+                            currentThemeSetting = currentTheme // currentTheme direkt übergeben
+                        )
+                    }
+                }
+            }
+    }
+}
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -547,136 +727,4 @@ fun DefaultPreviewLandscape() {
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AerpClickerApp(gameViewModel: GameViewModel = viewModel(),
-                   themeViewModel: ThemeViewModel = viewModel()
-) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    var showExitDialog by remember { mutableStateOf(false) }
-    val currentTheme by themeViewModel.currentThemeSetting.collectAsState()
 
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) } // Zustand für aktuellen Screen
-
-    // Wende das Theme dynamisch an
-    AerpClickerTheme(
-        darkTheme = when (currentTheme) {
-            ThemeSetting.LIGHT -> false
-            ThemeSetting.DARK -> true
-            ThemeSetting.SYSTEM -> isSystemInDarkTheme()
-        }
-    ) {
-
-        // Back-Handler Logik
-        BackHandler(enabled = drawerState.isOpen && currentScreen == Screen.Game) { // Nur für Drawer im GameScreen        scope.launch {
-            scope.launch {
-                drawerState.close()
-            }
-        }
-        BackHandler(enabled = currentScreen == Screen.Options) { // Zurück vom OptionsScreen zum GameScreen
-            currentScreen = Screen.Game
-        }
-        // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
-        BackHandler(enabled = drawerState.isClosed && currentScreen == Screen.Game && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
-            showExitDialog = true
-        }
-
-        if (showExitDialog) {
-            val currentActivity =
-                LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
-            AlertDialog(
-                onDismissRequest = {
-                    showExitDialog = false
-                }, // Dialog schließen, wenn außerhalb geklickt wird
-                title = { Text(stringResource(id = R.string.exit_dialog_title)) },
-                text = { Text(stringResource(id = R.string.exit_dialog_text)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showExitDialog = false
-                        currentActivity?.finish() // Sicheres Aufrufen von finish()
-                    }) {
-                        Text(stringResource(id = R.string.exit_dialog_confirm_button))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
-                        Text(stringResource(id = R.string.exit_dialog_dismiss_button))
-                    }
-                }
-            )
-        }
-
-
-
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            gesturesEnabled = currentScreen == Screen.Game, // Drawer nur im GameScreen öffnen
-            drawerContent = {
-                ModalDrawerSheet {
-                    ShopMenu(gameViewModel = gameViewModel)
-                }
-            }
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(stringResource(id = R.string.top_bar_title)) },
-                        navigationIcon = {
-                            when (currentScreen) {
-                                Screen.Game -> {
-                                    // Options-Icon auf der linken Seite im GameScreen
-                                    IconButton(onClick = { currentScreen = Screen.Options }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Settings,
-                                            contentDescription = stringResource(R.string.options_title)
-                                        )
-                                    }
-                                }
-                                Screen.Options -> {
-                                    // Zurück-Icon auf der linken Seite im OptionsScreen
-                                    IconButton(onClick = { currentScreen = Screen.Game }) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            contentDescription = stringResource(R.string.back_button_description)
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        actions = {
-                            // Shop-Button nur im GameScreen und jetzt allein in den Actions auf der rechten Seite
-                            if (currentScreen == Screen.Game) {
-                                TextButton(
-                                    onClick = { scope.launch { drawerState.open() } }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.ShoppingCart,
-                                        contentDescription = stringResource(id = R.string.shop_title)
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(stringResource(id = R.string.shop_title).uppercase())
-                                }
-                            }
-                            // Optional: Wenn du noch andere Icons rechts haben möchtest, kämen sie hierher.
-                        }
-                    )
-                }
-            ) { paddingValues ->
-                // Wechsle den angezeigten Inhalt basierend auf currentScreen
-                when (currentScreen) {
-                    is Screen.Game -> GameScreen(
-                        modifier = Modifier.padding(paddingValues),
-                        gameViewModel = gameViewModel
-                    )
-
-                    is Screen.Options -> OptionsScreen(
-                        modifier = Modifier.padding(paddingValues),
-                        themeViewModel = themeViewModel,
-                        currentThemeSetting = currentTheme // currentTheme direkt übergeben
-                    )
-                }
-            }
-        }
-    }
-}

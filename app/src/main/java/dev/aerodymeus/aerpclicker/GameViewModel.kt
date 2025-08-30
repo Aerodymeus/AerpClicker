@@ -1,21 +1,21 @@
 package dev.aerodymeus.aerpclicker // Or the correct package
 
-import android.app.Application // Hinzufügen
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import android.app.Application // Ändern von AndroidViewModel zu Application
+import androidx.compose.runtime.getValue // Ändern von mutableStateOf zu getValue
+import androidx.compose.runtime.mutableDoubleStateOf // Ändern von mutableStateOf zu mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf // Ändern von mutableStateOf zu mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf // Ändern von mutableStateOf zu mutableStateOf
+import androidx.compose.runtime.setValue // Ändern von mutableStateOf zu setValue
 import androidx.lifecycle.AndroidViewModel // Ändern von ViewModel zu AndroidViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first // Hinzufügen
-import kotlinx.coroutines.launch
-import kotlin.math.pow
-import kotlin.math.roundToInt
-import kotlin.math.max
-import androidx.datastore.preferences.core.edit // Hinzufügen
+import androidx.lifecycle.viewModelScope // Ändern von ViewModelScope zu viewModelScope
+import kotlinx.coroutines.Job // Ändern von Job zu kotlinx.coroutines.Job
+import kotlinx.coroutines.delay // Ändern von kotlinx.coroutines.delay zu delay
+import kotlinx.coroutines.flow.first // Ändern von kotlinx.coroutines.flow.first zu first
+import kotlinx.coroutines.launch // Ändern von kotlinx.coroutines.launch zu launch
+import kotlin.math.pow // Ändern von kotlin.math.pow zu pow
+import kotlin.math.roundToInt // Ändern von kotlin.math.roundToInt zu roundToInt
+import kotlin.math.max // Ändern von kotlin.math.max zu max
+import androidx.datastore.preferences.core.edit // Für das Schreiben der Preferences
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -226,6 +226,57 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun resetGameProgress() {
+        viewModelScope.launch {
+            // 1. Alle relevanten Schlüssel aus DataStore entfernen oder auf Standard setzen
+            dataStore.edit { preferences ->
+                // Option A: Alle Preferences im DataStore löschen (wenn dieser DataStore nur für Spieldaten ist)
+                preferences.clear() // Achtung: Löscht ALLES in diesem DataStore, auch Theme-Einstellungen, wenn sie im selben DataStore wären!
+
+                // Option B: Einzelne Schlüssel auf Standardwerte setzen oder entfernen (sicherer, wenn DataStore geteilt wird)
+//                preferences.remove(GameStateKeys.INTERNAL_SCORE)
+//                preferences.remove(GameStateKeys.CLICK_BOOST_LEVEL)
+//                preferences.remove(GameStateKeys.IS_AUTO_CLICKER_BOUGHT)
+//                preferences.remove(GameStateKeys.AUTO_CLICKER_INTERVAL_UPGRADE_LEVEL)
+//                preferences.remove(GameStateKeys.IS_PASSIVE_GENERATOR_BOUGHT)
+//                preferences.remove(GameStateKeys.FACTORY_PRODUCTION_UPGRADE_LEVEL)
+//                preferences.remove(GameStateKeys.FACTORY_INTERVAL_UPGRADE_LEVEL)
+                // Füge hier .remove() für alle deine Spielstand-Schlüssel hinzu
+            }
+
+            // 2. In-Memory Zustände im ViewModel auf Standardwerte zurücksetzen
+            //    Dies ist wichtig, damit die UI sofort den Reset widerspiegelt.
+            //    Die loadGameData() Funktion wird beim nächsten Start die (nicht mehr vorhandenen)
+            //    Daten aus DataStore laden und somit die Standardwerte verwenden.
+            internalScore = 0.0
+            clickBoostLevel = 0
+            clickMultiplier = baseClickValue // Dein Standardwert
+            clickBoostCost = 50             // Dein Standardwert
+
+            isAutoClickerActive = false
+            autoClickerIntervalUpgradeLevel = 0
+            autoClickerInterval = 10.0      // Dein Standardwert
+            autoClickerCost = 100           // Dein Standardwert
+            autoClickerIntervalUpgradeCost = 150 // Dein Standardwert
+            autoClickJob?.cancel()          // Aktiven Job stoppen
+            autoClickerCooldown = 0.0
+
+            isPassiveScoreGeneratorActive = false
+            factoryProductionUpgradeLevel = 0
+            factoryIntervalUpgradeLevel = 0
+            effectivePassiveScoreAmount = basePassiveScoreAmount // Dein Standardwert
+            passiveGeneratorInterval = 10.0   // Dein Standardwert
+            passiveScoreGeneratorCost = 100 // Dein Standardwert
+            factoryProductionUpgradeCost = 150 // Dein Standardwert
+            factoryIntervalUpgradeCost = 250   // Dein Standardwert
+            passiveScoreJob?.cancel()       // Aktiven Job stoppen
+            passiveGeneratorCooldown = 0.0
+
+            // 3. UI-Score aktualisieren
+            updateDisplayedScore()
+            // Optional: Weitere UI-Updates hier, falls nötig (z.B. Shop-Item-Zustände zurücksetzen)
+        }
+    }
 
     // Events
     fun onAerpClicked() {

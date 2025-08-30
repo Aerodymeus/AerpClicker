@@ -106,5 +106,12 @@
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">Systemstandard</string>
     <string name="back_button_description">Zurück</string>
+<!-- In res/values/strings.xml (und values-en/strings.xml) -->
+    <string name="game_data_title">Spieldaten</string>
+    <string name="reset_game_progress_button">Spielstand zurücksetzen</string>
+    <string name="reset_dialog_title">Spielstand zurücksetzen?</string>
+    <string name="reset_dialog_message">Möchtest du deinen gesamten Spielfortschritt wirklich unwiderruflich löschen? Alle Aerps und Upgrades gehen verloren.</string>
+    <string name="reset_dialog_confirm_button">Zurücksetzen</string>
+    <string name="reset_dialog_dismiss_button">Abbrechen</string>
 
 </resources>

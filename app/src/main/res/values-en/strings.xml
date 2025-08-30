@@ -88,5 +88,11 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System Default</string>
     <string name="back_button_description">Back</string>
+    <string name="game_data_title">Savegame</string>
+    <string name="reset_game_progress_button">Reset Savegame</string>
+    <string name="reset_dialog_title">Reset Savegame?</string>
+    <string name="reset_dialog_message">Do you really want to permanently delete all your game progress? All Aerps and upgrades will be lost.</string>
+    <string name="reset_dialog_confirm_button">Reset</string>
+    <string name="reset_dialog_dismiss_button">Cancel</string>
 
 </resources>
