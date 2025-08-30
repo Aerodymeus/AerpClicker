@@ -578,7 +578,7 @@ fun AerpClickerApp(gameViewModel: GameViewModel = viewModel(),
             currentScreen = Screen.Game
         }
         // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
-        BackHandler(enabled = drawerState.isClosed && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
+        BackHandler(enabled = drawerState.isClosed && currentScreen == Screen.Game && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
             showExitDialog = true
         }
 
