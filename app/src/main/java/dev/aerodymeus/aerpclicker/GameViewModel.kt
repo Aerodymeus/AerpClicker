@@ -47,7 +47,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     var autoClickerInterval by mutableDoubleStateOf(10.0) // Sekunden, jetzt veränderbar
         private set
     val minAutoClickerInterval = 0.5 // Minimal erlaubtes Intervall (z.B. 0.5 Sekunden)
-    private val autoClickerIntervalReduction = 0.1 // Senkung pro Upgrade
+    private val autoClickerIntervalReductionPercentage = 0.10 // 10% Reduktion pro Upgrade
     var autoClickerIntervalUpgradeCost by mutableIntStateOf(150) // Startkosten für das Intervall-Upgrade
         private set
     var autoClickerIntervalUpgradeLevel by mutableIntStateOf(0)
@@ -62,15 +62,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val basePassiveScoreAmount = 5.0
     var effectivePassiveScoreAmount by mutableDoubleStateOf(basePassiveScoreAmount)
         private set
-    var passiveGeneratorCooldown by mutableDoubleStateOf(0.0) // WIRD JETZT DOUBLE
+    var passiveGeneratorCooldown by mutableDoubleStateOf(0.0)
         private set
     var passiveGeneratorInterval by mutableDoubleStateOf(10.0) // Sekunden, JETZT VAR & DOUBLE
         private set
     var minPassiveGeneratorInterval = 1.0 // Minimales Intervall für die Fabrik, z.B. 1 Sekunde
         private set // Getter, um es in der UI zu verwenden, aber nicht von außen ändern
-    private val passiveGeneratorIntervalReduction = 0.1 // Senkung pro Upgrade
-
-    // NEU: Zustandsvariablen für Fabrik-Intervall-Upgrade
+    private val passiveGeneratorIntervalReductionPercentage = 0.10 // 10% Reduktion pro Upgrade
+    //Zustandsvariablen für Fabrik-Intervall-Upgrade
     var factoryIntervalUpgradeCost by mutableIntStateOf(250) // Startkosten
         private set
     var factoryIntervalUpgradeLevel by mutableIntStateOf(0)
@@ -84,6 +83,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var factoryProductionBonusPerLevel = 5.0 // Umbenannt von factoryUpgradeBonusPerLevel
         private set
+    //Definiere den Spezialbonus und das Intervall
+    private val specialBonusAmount = 200.0 // Der extra Bonus
+    private val specialBonusLevelInterval = 5 // Alle wie viele Level gibt es den Spezialbonus
+
 
     private var autoClickJob: Job? = null
     private var passiveScoreJob: Job? = null // Job für den passiven Score Generator
@@ -139,8 +142,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 var tempAutoClickerInterval = 10.0 // Startintervall
                 var tempAutoClickerIntervalCost = 150 // Startkosten für Upgrade
                 (0 until loadedAutoClickerIntervalLevel).forEach { i ->
-                    tempAutoClickerInterval = max(minAutoClickerInterval, tempAutoClickerInterval - autoClickerIntervalReduction)
-                    tempAutoClickerIntervalCost = (tempAutoClickerIntervalCost * 1.6).roundToInt()
+                    tempAutoClickerInterval = max(minAutoClickerInterval, tempAutoClickerInterval * (1 - autoClickerIntervalReductionPercentage))
+                    tempAutoClickerIntervalCost = (tempAutoClickerIntervalCost * 1.2).roundToInt()
                 }
                 autoClickerIntervalUpgradeLevel = loadedAutoClickerIntervalLevel
                 autoClickerInterval = tempAutoClickerInterval
@@ -163,23 +166,22 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             // Fabrik Produktions-Upgrade laden
             val loadedFactoryProductionLevel = prefs[GameStateKeys.FACTORY_PRODUCTION_UPGRADE_LEVEL] ?: 0
+            factoryProductionUpgradeLevel = loadedFactoryProductionLevel // Setze das Level
+
             // Initialisiere Kosten und Bonus
             var tempFactoryProductionUpgradeCost = 150 // Startkosten
-            var tempEffectivePassiveScore = basePassiveScoreAmount
-
             if (passiveGeneratorBought || loadedFactoryProductionLevel > 0) {
-                (0 until loadedFactoryProductionLevel).forEach { i ->
-                    tempEffectivePassiveScore += factoryProductionBonusPerLevel
-                    tempFactoryProductionUpgradeCost = (tempFactoryProductionUpgradeCost * 1.5).toInt()
+                (0 until loadedFactoryProductionLevel).forEach { _ -> // _ da der Index i nicht direkt für die Kostenberechnung hier verwendet wird
+                    tempFactoryProductionUpgradeCost = (tempFactoryProductionUpgradeCost * 1.5).toInt() // Deine Kostensteigerungslogik
                 }
-                factoryProductionUpgradeLevel = loadedFactoryProductionLevel
-                effectivePassiveScoreAmount = tempEffectivePassiveScore
                 factoryProductionUpgradeCost = tempFactoryProductionUpgradeCost
             } else {
-                factoryProductionUpgradeLevel = 0
-                effectivePassiveScoreAmount = basePassiveScoreAmount
                 factoryProductionUpgradeCost = 150
             }
+
+            // WICHTIG: Rufe updateEffectivePassiveScoreAmount auf, NACHDEM das Level geladen wurde
+            // und bevor der Generator gestartet wird, um sicherzustellen, dass der korrekte Betrag verwendet wird.
+            updateEffectivePassiveScoreAmount()
 
 
             // Fabrik Intervall-Upgrade laden
@@ -190,8 +192,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
             if (passiveGeneratorBought || loadedFactoryIntervalLevel > 0) {
                 (0 until loadedFactoryIntervalLevel).forEach { i ->
-                    tempPassiveGeneratorInterval = max(minPassiveGeneratorInterval, tempPassiveGeneratorInterval - passiveGeneratorIntervalReduction)
-                    tempFactoryIntervalUpgradeCost = (tempFactoryIntervalUpgradeCost * 1.7).roundToInt()
+                    tempPassiveGeneratorInterval = max(minPassiveGeneratorInterval, tempPassiveGeneratorInterval * (1 - passiveGeneratorIntervalReductionPercentage))
+                    tempFactoryIntervalUpgradeCost = (tempFactoryIntervalUpgradeCost * 1.2).roundToInt()
                 }
                 factoryIntervalUpgradeLevel = loadedFactoryIntervalLevel
                 passiveGeneratorInterval = tempPassiveGeneratorInterval
@@ -203,7 +205,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             if (isPassiveScoreGeneratorActive) { // Nur starten, wenn Basis gekauft
-                updateEffectivePassiveScoreAmount() // Stelle sicher, dass der Wert aktuell ist
+                //updateEffectivePassiveScoreAmount() // Stelle sicher, dass der Wert aktuell ist
                 startPassiveScoreGenerator()
             }
             handleScoreChangeWithImmediateUpdate() // UI final aktualisieren
@@ -324,12 +326,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             autoClickerIntervalUpgradeLevel++
 
             // Berechne das neue Intervall, stelle sicher, dass es nicht unter das Minimum fällt
-            val newInterval = autoClickerInterval - autoClickerIntervalReduction
+            val newInterval = autoClickerInterval * (1 - autoClickerIntervalReductionPercentage)
             autoClickerInterval = max(minAutoClickerInterval, newInterval) // max stellt sicher, dass es nicht unter minAutoClickerInterval fällt
-            autoClickerIntervalUpgradeCost = (autoClickerIntervalUpgradeCost * 1.6).roundToInt() // Kostensteigerung
+            autoClickerIntervalUpgradeCost = (autoClickerIntervalUpgradeCost * 1.2).roundToInt() // Kostensteigerung
 
             // Wenn der Auto-Clicker bereits aktiv ist, starte ihn mit dem neuen Intervall neu
             if (isAutoClickerActive) {
+                autoClickJob?.cancel() // Stoppe den laufenden Job
                 startAutoClicker()
             }
             handleScoreChangeWithImmediateUpdate()
@@ -355,22 +358,39 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             fun buyFactoryProductionUpgrade() {
                 if (internalScore >= factoryProductionUpgradeCost && isPassiveScoreGeneratorActive) {
                     internalScore -= factoryProductionUpgradeCost
-                    factoryProductionUpgradeLevel++
+                    factoryProductionUpgradeLevel++ // Erhöhe das Level
+
+                    // Kosten für das nächste Upgrade erhöhen (Beispiel)
                     factoryProductionUpgradeCost = (factoryProductionUpgradeCost * 1.5).toInt()
-                    updateEffectivePassiveScoreAmount()
+
+                    updateEffectivePassiveScoreAmount() // Diese Funktion enthält jetzt die neue Logik
+
+                    // Wenn die Fabrik aktiv ist, starte sie neu, um den aktualisierten Score zu verwenden
+                    // (Obwohl die Erhöhung des Scores selbst in startPassiveScoreGenerator geschieht)
+                    // Die Logik in startPassiveScoreGenerator verwendet bereits effectivePassiveScoreAmount.
+                    // Ein expliziter Neustart ist hier nicht unbedingt nötig, wenn nur der Betrag angepasst wird,
+                    // da die Schleife in startPassiveScoreGenerator diesen Wert bei jeder Iteration neu liest.
+                    // Aber wenn du sichergehen willst, dass alles sofort korrekt ist:
+                    // if (isPassiveScoreGeneratorActive) {
+                    //     passiveScoreJob?.cancel()
+                    //     startPassiveScoreGenerator()
+                    // }
+
                     handleScoreChangeWithImmediateUpdate()
                     saveGameData()
                 }
             }
 
-    // NEU: Funktion zum Kaufen des Fabrik-Intervall-Upgrades
+    // Funktion zum Kaufen des Fabrik-Intervall-Upgrades
     fun buyFactoryIntervalUpgrade() {
         if (internalScore >= factoryIntervalUpgradeCost && isPassiveScoreGeneratorActive && passiveGeneratorInterval > minPassiveGeneratorInterval) {
             internalScore -= factoryIntervalUpgradeCost
             factoryIntervalUpgradeLevel++
-            passiveGeneratorInterval = max(minPassiveGeneratorInterval, passiveGeneratorInterval - passiveGeneratorIntervalReduction)
-            factoryIntervalUpgradeCost = (factoryIntervalUpgradeCost * 1.7).roundToInt() // Eigene Kostensteigerung
+            val newInterval = passiveGeneratorInterval * (1 - passiveGeneratorIntervalReductionPercentage)
+            passiveGeneratorInterval = max(minPassiveGeneratorInterval, newInterval) // Stelle sicher, dass das Minimum nicht unterschritten wird
+            factoryIntervalUpgradeCost = (factoryIntervalUpgradeCost * 1.2).roundToInt() // Eigene Kostensteigerung
             if (isPassiveScoreGeneratorActive) {
+                passiveScoreJob?.cancel()
                 startPassiveScoreGenerator() // Neu starten mit neuem Intervall
             }
             handleScoreChangeWithImmediateUpdate()
@@ -379,8 +399,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun updateEffectivePassiveScoreAmount() {
-        val totalBonus = factoryProductionUpgradeLevel * factoryProductionBonusPerLevel
-        effectivePassiveScoreAmount = basePassiveScoreAmount + totalBonus
+        var calculatedBonus = 0.0
+        // Standardbonus für jedes Level
+        calculatedBonus += factoryProductionUpgradeLevel * factoryProductionBonusPerLevel
+
+        // Berechne, wie oft der Spezialbonus gewährt wurde
+        val numberOfSpecialBonuses = factoryProductionUpgradeLevel / specialBonusLevelInterval
+        calculatedBonus += numberOfSpecialBonuses * specialBonusAmount
+
+        effectivePassiveScoreAmount = basePassiveScoreAmount + calculatedBonus
+
+        // Stelle sicher, dass der passive Score Generator neu gestartet wird,
+        // falls er aktiv ist und sich der Betrag ändert (obwohl dies meist nach einem Upgrade passiert).
+        // Dies ist optional hier, da buyFactoryProductionUpgrade normalerweise den Neustart auslöst.
+        // if (isPassiveScoreGeneratorActive) {
+        //     passiveScoreJob?.cancel()
+        //     startPassiveScoreGenerator()
+        // }
     }
 
     // Coroutine für den AutoClicker

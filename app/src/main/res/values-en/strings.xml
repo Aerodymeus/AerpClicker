@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <resources>
+<resources>
     <string name="get_aerps_text">Get Aerps!</string>
         <string name="duplicate_aerps_label">Double Aerps</string> <!-- For the app title in the manifest and possibly elsewhere -->
 
@@ -29,7 +29,8 @@
         <!-- For the Factory Upgrade Item -->
         <string name="shop_item_factory_upgrade">Factory Booster</string>
         <string name="shop_item_factory_upgrade_description_active">The factory is now producing additional Aerps!</string>
-        <string name="shop_item_factory_upgrade_description_available">Increases your factory\'s production by another 5 Aerps per cycle.</string>        <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
+        <string name="shop_item_factory_upgrade_description_available">Increases your factory\'s production by another 5 Aerps per cycle.</string>
+    <string name="shop_item_factory_upgrade_description_requires_factory">You need an Aerp Factory first to buy this booster.</string>
         <string name="shop_item_buy_button_requires_base">Buy (Requires Base Item)</string> <!-- Optional, for the button text -->
 
         <!-- For the factory's production display -->
@@ -55,7 +56,7 @@
         <string name="shop_item_click_boost_description">Increases Aerps per click by 20%.</string> <!-- NEW DESCRIPTION -->
 
         <string name="shop_item_auto_clicker_interval_upgrade">Faster Clicker</string>
-        <string name="shop_item_auto_clicker_interval_upgrade_description">Reduces Auto-Clicker interval by 0.1s. Current: %.1fs</string>
+        <string name="shop_item_auto_clicker_interval_upgrade_description">Reduces Auto-Clicker interval by 10%%. Current: %.1fs</string>
         <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximum speed reached (%.1fs)!</string>
         <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Requires active Auto-Clicker.</string>
 
@@ -72,7 +73,7 @@
     <string name="shop_item_factory_production_upgrade_description_requires_factory">You need an Aerp Factory first.</string>
 
     <string name="shop_item_factory_interval_upgrade">Faster Factory</string>
-    <string name="shop_item_factory_interval_upgrade_description">Reduces Factory interval by 0.1s. Current: %.1fs</string>
+    <string name="shop_item_factory_interval_upgrade_description">Reduces Factory interval by 10%%. Current: %.1fs</string>
     <string name="shop_item_factory_interval_upgrade_description_max_reached">Maximum speed reached (%.1fs)!</string>
     <string name="shop_item_factory_interval_upgrade_requires_factory">Requires active Aerp Factory.</string>
 

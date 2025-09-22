@@ -65,9 +65,7 @@
     <string name="shop_item_click_boost_description">Erhöht die Aerps pro Klick um 20%.</string>
     <!-- ... andere Strings ... -->
     <string name="shop_item_auto_clicker_interval_upgrade">Schneller Klicker</string>
-    <string name="shop_item_auto_clicker_interval_upgrade_description">Reduziert das Auto-Klicker
-        Intervall um 0.1s. Aktuell: %.1fs
-    </string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description">"Reduziert das Auto-Klicker Intervall um 10%%. Aktuell: %.1fs "</string>
     <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximale
         Geschwindigkeit erreicht (%.1fs)!
     </string>
@@ -89,7 +87,7 @@
     <string name="shop_item_factory_production_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik.</string>
 
     <string name="shop_item_factory_interval_upgrade">Schnellere Fabrik</string>
-    <string name="shop_item_factory_interval_upgrade_description">Reduziert das Fabrik-Intervall um 0.1s. Aktuell: %.1fs</string>
+    <string name="shop_item_factory_interval_upgrade_description">Reduziert das Fabrik-Intervall um 10%%. Aktuell: %.1fs</string>
     <string name="shop_item_factory_interval_upgrade_description_max_reached">Maximale Geschwindigkeit erreicht (%.1fs)!</string>
     <string name="shop_item_factory_interval_upgrade_requires_factory">Benötigt aktive Aerp-Fabrik.</string>
 

@@ -45,6 +45,7 @@ android {
         compose = true
     }
     buildToolsVersion = "36.0.0"
+
 }
 
 dependencies {
@@ -76,7 +77,6 @@ dependencies {
         implementation(libs.androidx.activity.compose)
         implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    implementation(platform(libs.firebase.bom))
 
     implementation(libs.androidx.datastore.preferences) // Überprüfe die neueste Version
     implementation(libs.androidx.lifecycle.viewmodel.ktx) // Überprüfe die neueste Version
