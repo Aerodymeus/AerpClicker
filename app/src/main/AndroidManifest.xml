@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AerpClicker">
         <activity
-            android:name="dev.aerodymeus.aerpclicker.UI"
+            android:name="dev.aerodymeus.aerpclicker.ui.UI"
             android:exported="true"
             android:theme="@style/Theme.AerpClicker">
             <intent-filter>

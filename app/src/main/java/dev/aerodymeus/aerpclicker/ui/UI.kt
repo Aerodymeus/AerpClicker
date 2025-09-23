@@ -1,4 +1,4 @@
-package dev.aerodymeus.aerpclicker
+package dev.aerodymeus.aerpclicker.ui
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration // Import für Configuration
@@ -53,6 +53,9 @@ import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser I
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.OutlinedButton
+import dev.aerodymeus.aerpclicker.GameViewModel
+import dev.aerodymeus.aerpclicker.R
+import dev.aerodymeus.aerpclicker.ThemeViewModel
 
 
 enum class ThemeSetting {
