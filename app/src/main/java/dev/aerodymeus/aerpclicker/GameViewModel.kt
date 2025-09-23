@@ -304,7 +304,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
            internalScore -= clickBoostCost
            clickBoostLevel++
            clickMultiplier = baseClickValue * (1.2).pow(clickBoostLevel)
-           clickBoostCost = (clickBoostCost * 1.5).roundToInt()
+           clickBoostCost = (clickBoostCost * 1.3).roundToInt()
            handleScoreChangeWithImmediateUpdate()
            saveGameData()
         }
