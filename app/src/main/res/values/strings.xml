@@ -13,6 +13,7 @@
     <string name="cooldown_auto_clicker_prefix">Auto-Klicker: </string>
     <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik: </string>
     <string name="cooldown_suffix" translatable="false">s</string> <!-- Suffix für Sekunden -->
+    <string name="game_background_image_description">Hintergrundbild zeigt einen Wolf, der einen Knopf drückt</string>
 
     <!-- UI.kt - ShopMenu -->
     <string name="shop_title">Verbesserungen</string>

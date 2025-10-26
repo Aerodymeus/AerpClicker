@@ -44,8 +44,12 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 import android.app.Application // Sicherstellen, dass dieser Import da ist
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.collectAsState
@@ -53,9 +57,14 @@ import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser I
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import dev.aerodymeus.aerpclicker.GameViewModel
 import dev.aerodymeus.aerpclicker.R
 import dev.aerodymeus.aerpclicker.ThemeViewModel
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 
 
 enum class ThemeSetting {
@@ -84,7 +93,7 @@ fun OptionsScreen(
     modifier: Modifier = Modifier,
     themeViewModel: ThemeViewModel,
     gameViewModel: GameViewModel,
-    currentThemeSetting: ThemeSetting // Den aktuellen Wert direkt empfangen
+    currentThemeSetting: ThemeSetting, // Den aktuellen Wert direkt empfangen
 ) {
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
 
@@ -185,9 +194,37 @@ fun OptionsScreen(
 
 @SuppressLint("StringFormatMatches", "DefaultLocale") // Nötig für die Formatierung des Multiplikators
 @Composable
-fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
+fun GameScreen(
+    modifier: Modifier = Modifier,
+    gameViewModel: GameViewModel,
+    useDarkTheme: Boolean
+) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    // Box als äußerster com . google . android . gms . tagmanager . Container, um das Hintergrundbild und den Inhalt zu überlagern
+    Box(modifier = modifier.fillMaxSize()) {
+        // Prüfen, ob das dunkle Thema aktiv ist
+        //val isDarkTheme = isSystemInDarkTheme()
+
+        // Die Matrix zur Invertierung der Farben
+        val invertColorsMatrix = ColorMatrix(
+            floatArrayOf(
+                -1f,  0f,  0f, 0f, 255f,
+                0f, -1f,  0f, 0f, 255f,
+                0f,  0f, -1f, 0f, 255f,
+                0f,  0f,  0f, 1f,   0f
+            )
+        )
+        // HINTERGRUNDBILD
+        Image(
+            painter = painterResource(id = R.drawable.aerp_button), // Dein Bildname hier
+            contentDescription = stringResource(id = R.string.game_background_image_description), // Füge einen beschreibenden String in strings.xml hinzu
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop, // Oder eine andere ContentScale-Option (Crop ist oft gut für Hintergründe)
+            colorFilter = if (useDarkTheme) ColorFilter.colorMatrix(invertColorsMatrix) else null
+        )
+    }
 
     val mainContent = @Composable {
         Column(
@@ -198,7 +235,13 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
             Text(
                 text = stringResource(id = R.string.score_text, gameViewModel.displayedScore),
                 fontSize = 32.sp, // Keep only one fontSize
-                modifier = Modifier.padding(bottom = 32.dp)
+                color = Color.White,
+                modifier = Modifier
+                    .background(
+                        Color.Black.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(4.dp)
+                    ) // Leichter Hintergrund für den Text
+                    .padding(8.dp)
             )
 
             Button(
@@ -208,6 +251,7 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                 Text(
                     text = stringResource(id = R.string.click_me_button),
                     fontSize = 24.sp,
+                    color = Color.White,
                     textAlign = TextAlign.Center // Text zentrieren
                 )
             }
@@ -216,7 +260,12 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
 
     val cooldownsContent = @Composable {
         Column(
-            modifier = Modifier.padding(start = 16.dp, end = 8.dp, top = 16.dp, bottom = 16.dp),
+            modifier = Modifier
+                .background(
+                    Color.Black.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.Top
         ) {
@@ -226,7 +275,9 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                     text = stringResource(id = R.string.cooldown_auto_clicker_prefix) + " " +
                             cooldownText + stringResource(id = R.string.cooldown_suffix),
                     fontSize = 16.sp,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 8.dp),
+
                 )
             }
             if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
@@ -234,7 +285,9 @@ fun GameScreen(modifier: Modifier = Modifier, gameViewModel: GameViewModel) {
                 Text(
                     text = stringResource(id = R.string.cooldown_aerp_factory_prefix) + " " +
                             cooldownText + stringResource(id = R.string.cooldown_suffix),
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
             }
         }
@@ -278,7 +331,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
         val description: String? = null,
         val requiresBaseItemActive: Boolean? = null,
         val currentLevel: Int? = null,
-        val currentInterval: Double? = null
+        val currentInterval: Double? = null,
     )
 
     val shopItemsList = listOf(
@@ -410,7 +463,7 @@ fun ShopItem(
     requiresBaseItemActive: Boolean? = null,
     currentLevel: Int? = null,
     currentInterval: Double? = null,
-    gameViewModel: GameViewModel
+    gameViewModel: GameViewModel,
 ) {
     Column(modifier = Modifier.padding(bottom = 8.dp)) {
         Text(
@@ -486,22 +539,6 @@ fun ShopItem(
             )
         }
 
-
-//        // Anzeige der Produktion der Fabrik (gerundet)
-//        if (currentProduction != null && name == stringResource(id = R.string.shop_item_aerp_factory) && isActive == true) {
-//            val formattedProduction = String.format("%.1f", currentProduction) // Produktion als Double formatieren
-//            Text(
-//                stringResource(id = R.string.shop_item_production_prefix) + " " +
-//                        formattedProduction + " " +// Verwende den formatierten Wert
-//                        stringResource(id = R.string.shop_item_production_suffix),
-//                fontSize = 14.sp,
-//                style = MaterialTheme.typography.bodySmall,
-//                modifier = Modifier.padding(bottom = 4.dp)
-//            )
-//        }
-
-
-
         // Button-Logik
         val buttonEnabled = when (name) {
             stringResource(id = R.string.shop_item_auto_aerper) -> canAfford && isActive == false
@@ -568,14 +605,29 @@ fun AerpClickerApp(
 
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) } // Zustand für aktuellen Screen
 
+    // NEUE LOGIK: Entscheiden, ob das Dark Theme verwendet werden soll
+    val currentThemeSetting by themeViewModel.currentThemeSetting.collectAsState()
+    val useDarkTheme = when (currentThemeSetting) {
+        ThemeSetting.LIGHT -> false
+        ThemeSetting.DARK -> true
+        ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+    }
+
     // Wende das Theme dynamisch an
-    AerpClickerTheme(
-        darkTheme = when (currentTheme) {
-            ThemeSetting.LIGHT -> false
-            ThemeSetting.DARK -> true
-            ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+    AerpClickerTheme(darkTheme = useDarkTheme) {
+//            ThemeSetting.LIGHT -> false
+//            ThemeSetting.DARK -> true
+//            ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+
+            if (currentScreen == Screen.Game) {
+                GameScreen(
+                    gameViewModel = gameViewModel,
+                    useDarkTheme = useDarkTheme // Hier übergeben!
+                )
+            }
+
         }
-    ) {
+
 
             // Back-Handler Logik
             BackHandler(enabled = drawerState.isOpen && currentScreen == Screen.Game) { // Nur für Drawer im GameScreen        scope.launch {
@@ -677,7 +729,8 @@ fun AerpClickerApp(
                     when (currentScreen) {
                         is Screen.Game -> GameScreen(
                             modifier = Modifier.padding(paddingValues),
-                            gameViewModel = gameViewModel
+                            gameViewModel = gameViewModel,
+                            useDarkTheme = useDarkTheme
                         )
 
                         is Screen.Options -> OptionsScreen(
@@ -689,8 +742,7 @@ fun AerpClickerApp(
                     }
                 }
             }
-    }
-}
+        }
 
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -706,8 +758,9 @@ fun DefaultPreviewPortrait() {
         val previewViewModel = GameViewModel(previewApplication)
 
         // Setze hier Testdaten für die Preview, falls gewünscht
-        // Beispiel: previewViewModel.internalScore = 1234.0
-        // previewViewModel.clickBoostLevel = 2
+        //Beispiel:
+        //previewViewModel.internalScore = 1234.0
+        //previewViewModel.clickBoostLevel = 2
         // Wichtig: Du müsstest ggf. interne Funktionen aufrufen, um abgeleitete Werte
         // (wie Kosten) im ViewModel zu aktualisieren, wenn du Level direkt setzt.
         // Oder du erstellst eine Hilfsfunktion im ViewModel, um es für Previews zu initialisieren.

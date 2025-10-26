@@ -14,7 +14,8 @@
     <!-- Suffix for seconds -->
 
         <!-- UI.kt - ShopMenu -->
-        <string name="shop_title">Upgrades</string>
+    <string name="game_background_image_description">Background shows as Wolf which presses a Button</string>
+    <string name="shop_title">Upgrades</string>
         <string name="shop_item_double_aerps">Double Aerps</string>
         <string name="shop_item_auto_aerper">Auto-Aerper</string>
         <string name="shop_item_aerp_factory">Aerp Factory</string>
