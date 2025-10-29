@@ -231,6 +231,8 @@ fun GameScreen(
     modifier: Modifier = Modifier,
     gameViewModel: GameViewModel,
     useDarkTheme: Boolean,
+    onShopButtonClicked: () -> Unit,
+    onSettingsButtonClicked: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -257,6 +259,46 @@ fun GameScreen(
             contentScale = ContentScale.Crop, // Oder eine andere ContentScale-Option (Crop ist oft gut für Hintergründe)
             colorFilter = if (useDarkTheme) ColorFilter.colorMatrix(invertColorsMatrix) else null
         )
+
+        Button(
+            onClick = onShopButtonClicked, // <<< 2. Den neuen Parameter hier verwenden
+            modifier = Modifier
+                .align(Alignment.TopEnd) // <<< 3. Richtet den Button oben rechts aus
+                .padding(16.dp), // Fügt etwas Abstand zum Rand hinzu
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.ShoppingCart,
+                    contentDescription = null,
+                    //tint = MaterialTheme.colorScheme.primary // Sorgt für gute Sichtbarkeit
+                )
+                Spacer(Modifier.width(4.dp))
+
+                Text(
+                    text=stringResource(id = R.string.shop_title).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                    //color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Button(
+            onClick = onSettingsButtonClicked, // <<< 2. Den neuen Parameter hier verwenden
+            modifier = Modifier
+                .align(Alignment.TopStart) // <<< 3. Richtet den Button oben links aus
+                .padding(16.dp),
+            shape = RoundedCornerShape(100),
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                //tint = MaterialTheme.colorScheme.primary // Sorgt für gute Sichtbarkeit
+            )
+        }
     }
 
     val mainContent = @Composable {
@@ -280,6 +322,7 @@ fun GameScreen(
             Button(
                 onClick = { gameViewModel.onAerpClicked() },
                 modifier = Modifier.size(200.dp)
+
             ) {
                 Text(
                     text = stringResource(id = R.string.click_me_button),
@@ -353,7 +396,7 @@ fun GameScreen(
 @Composable
 fun ShopMenu(
     gameViewModel: GameViewModel,
-    onCloseClicked: () -> Unit
+    onCloseClicked: () -> Unit,
 ) {
     data class ShopItemData(
         val name: String,
@@ -688,7 +731,15 @@ fun AerpClickerApp(
             if (currentScreen == Screen.Game) {
                 GameScreen(
                     gameViewModel = gameViewModel,
-                    useDarkTheme = useDarkTheme // Hier übergeben!
+                    useDarkTheme = useDarkTheme,
+                    onShopButtonClicked = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    },
+                    onSettingsButtonClicked = {
+                        currentScreen = Screen.Options
+                    }
                 )
             }
 
@@ -756,17 +807,17 @@ fun AerpClickerApp(
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text(stringResource(id = R.string.top_bar_title)) },
+                        title = { Text(text=stringResource(id = R.string.top_bar_title)) },
                         navigationIcon = {
                             when (currentScreen) {
                                 Screen.Game -> {
-                                    // Options-Icon auf der linken Seite im GameScreen
-                                    IconButton(onClick = { currentScreen = Screen.Options }) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Settings,
-                                            contentDescription = stringResource(R.string.options_title)
-                                        )
-                                    }
+//                                    // Options-Icon auf der linken Seite im GameScreen
+//                                    IconButton(onClick = { currentScreen = Screen.Options }) {
+//                                        Icon(
+//                                            imageVector = Icons.Filled.Settings,
+//                                            contentDescription = stringResource(R.string.options_title)
+//                                        )
+//                                    }
                                 }
 
                                 Screen.Options -> {
@@ -782,18 +833,18 @@ fun AerpClickerApp(
                         },
                         actions = {
                             // Shop-Button nur im GameScreen und jetzt allein in den Actions auf der rechten Seite
-                            if (currentScreen == Screen.Game) {
-                                TextButton(
-                                    onClick = { scope.launch { drawerState.open() } }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.ShoppingCart,
-                                        contentDescription = stringResource(id = R.string.shop_title)
-                                    )
-                                    Spacer(Modifier.width(4.dp))
-                                    Text(stringResource(id = R.string.shop_title).uppercase())
-                                }
-                            }
+//                            if (currentScreen == Screen.Game) {
+//                                TextButton(
+//                                    onClick = { scope.launch { drawerState.open() } }
+//                                ) {
+//                                    Icon(
+//                                        imageVector = Icons.Filled.ShoppingCart,
+//                                        contentDescription = stringResource(id = R.string.shop_title)
+//                                    )
+//                                    Spacer(Modifier.width(4.dp))
+//                                    Text(stringResource(id = R.string.shop_title).uppercase())
+//                                }
+//                            }
                             // Optional: Wenn du noch andere Icons rechts haben möchtest, kämen sie hierher.
                         }
                     )
@@ -804,7 +855,15 @@ fun AerpClickerApp(
                             is Screen.Game -> GameScreen(
                                 modifier = Modifier.padding(paddingValues),
                                 gameViewModel = gameViewModel,
-                                useDarkTheme = useDarkTheme
+                                useDarkTheme = useDarkTheme,
+                                onShopButtonClicked = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                },
+                                onSettingsButtonClicked = {
+                                    currentScreen = Screen.Options
+                                }
                             )
 
                             is Screen.Options -> OptionsScreen(
