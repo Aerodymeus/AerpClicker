@@ -181,14 +181,29 @@ fun OptionsScreen(
                     TextButton(
                         onClick = { showResetConfirmationDialog = false }
                     ) {
-                        Text(stringResource(R.string.reset_dialog_dismiss_button))
+                        Text(
+                            text=stringResource(R.string.reset_dialog_dismiss_button),
+                        )
                     }
                 }
             )
+        }
             // Hier könntest du weitere Optionen hinzufügen
             // Spacer(Modifier.height(24.dp))
             // Text("Weitere Option...")
-        }
+        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
+
+        Text(
+            text=stringResource(R.string.credits_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        Text(
+            text=stringResource(R.string.credits_text),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
     }
 }
 

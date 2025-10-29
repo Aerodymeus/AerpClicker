@@ -112,5 +112,7 @@
     <string name="reset_dialog_message">Möchtest du deinen gesamten Spielfortschritt wirklich unwiderruflich löschen? Alle Aerps und Upgrades gehen verloren.</string>
     <string name="reset_dialog_confirm_button">Zurücksetzen</string>
     <string name="reset_dialog_dismiss_button">Abbrechen</string>
+    <string name="credits_title">Credits</string>
+    <string name="credits_text">Background Design: Yegitu\nCode of App: Aerodymeus</string>
 
 </resources>

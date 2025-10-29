@@ -96,5 +96,7 @@
     <string name="reset_dialog_message">Do you really want to permanently delete all your game progress? All Aerps and upgrades will be lost.</string>
     <string name="reset_dialog_confirm_button">Reset</string>
     <string name="reset_dialog_dismiss_button">Cancel</string>
+    <string name="credits_title">Credits</string>
+    <string name="credits_text">Background Design: Yegitu\nCode of App: Aerodymeus</string>
 
 </resources>
