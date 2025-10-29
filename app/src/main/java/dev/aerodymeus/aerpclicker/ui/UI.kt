@@ -48,6 +48,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.IconButton
@@ -56,6 +57,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser Import da ist
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -65,6 +67,7 @@ import dev.aerodymeus.aerpclicker.R
 import dev.aerodymeus.aerpclicker.ThemeViewModel
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+
 
 
 enum class ThemeSetting {
@@ -212,7 +215,7 @@ fun OptionsScreen(
 fun GameScreen(
     modifier: Modifier = Modifier,
     gameViewModel: GameViewModel,
-    useDarkTheme: Boolean
+    useDarkTheme: Boolean,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
@@ -333,7 +336,10 @@ fun GameScreen(
 
 @SuppressLint("StringFormatMatches") // Nötig für die Formatierung des Multiplikators
 @Composable
-fun ShopMenu(gameViewModel: GameViewModel) {
+fun ShopMenu(
+    gameViewModel: GameViewModel,
+    onCloseClicked: () -> Unit
+) {
     data class ShopItemData(
         val name: String,
         val cost: Int,
@@ -439,9 +445,36 @@ fun ShopMenu(gameViewModel: GameViewModel) {
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)) {
-        Text(stringResource(id = R.string.shop_title), fontSize = 24.sp, modifier = Modifier.padding(bottom = 16.dp))
-        LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp) // Abstand zur Liste darunter
+        ) {
+            // 1. Der Zurück-Button (Icon)
+            IconButton(onClick = onCloseClicked) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Das Standard-Zurück-Icon
+                    contentDescription = stringResource(id = R.string.back_button_description) // Wiederverwendbarer Text für Barrierefreiheit
+                )
+            }
+
+            // Etwas Abstand zwischen Icon und Titel
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // 2. Der Titel
+            Text(
+                text = stringResource(id = R.string.shop_title),
+                style = MaterialTheme.typography.headlineMedium // Passt gut zur TopAppBar
+            )
+
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
             items(shopItemsList) { itemData ->
                 ShopItem(
                     name = itemData.name,
@@ -461,6 +494,7 @@ fun ShopMenu(gameViewModel: GameViewModel) {
             }
         }
     }
+
 }
 
 @SuppressLint("StringFormatMatches", "DefaultLocale")
@@ -611,7 +645,7 @@ fun ShopItem(
 @Composable
 fun AerpClickerApp(
     gameViewModel: GameViewModel = viewModel(),
-    themeViewModel: ThemeViewModel = viewModel()
+    themeViewModel: ThemeViewModel = viewModel(),
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -628,8 +662,10 @@ fun AerpClickerApp(
         ThemeSetting.SYSTEM -> isSystemInDarkTheme()
     }
 
+
     // Wende das Theme dynamisch an
-    AerpClickerTheme(darkTheme = useDarkTheme) {
+
+        AerpClickerTheme(darkTheme = useDarkTheme) {
 //            ThemeSetting.LIGHT -> false
 //            ThemeSetting.DARK -> true
 //            ThemeSetting.SYSTEM -> isSystemInDarkTheme()
@@ -644,120 +680,130 @@ fun AerpClickerApp(
         }
 
 
-            // Back-Handler Logik
-            BackHandler(enabled = drawerState.isOpen && currentScreen == Screen.Game) { // Nur für Drawer im GameScreen        scope.launch {
-                scope.launch {
-                    drawerState.close()
-                }
-            }
-            BackHandler(enabled = currentScreen == Screen.Options) { // Zurück vom OptionsScreen zum GameScreen
-                currentScreen = Screen.Game
-            }
-            // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
-            BackHandler(enabled = drawerState.isClosed && currentScreen == Screen.Game && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
-                showExitDialog = true
-            }
-
-            if (showExitDialog) {
-                val currentActivity =
-                    LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
-                AlertDialog(
-                    onDismissRequest = {
-                        showExitDialog = false
-                    }, // Dialog schließen, wenn außerhalb geklickt wird
-                    title = { Text(stringResource(id = R.string.exit_dialog_title)) },
-                    text = { Text(stringResource(id = R.string.exit_dialog_text)) },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            showExitDialog = false
-                            currentActivity?.finish() // Sicheres Aufrufen von finish()
-                        }) {
-                            Text(stringResource(id = R.string.exit_dialog_confirm_button))
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showExitDialog = false }) {
-                            Text(stringResource(id = R.string.exit_dialog_dismiss_button))
-                        }
-                    }
-                )
-            }
-
-
-
-            ModalNavigationDrawer(
-                drawerState = drawerState,
-                gesturesEnabled = currentScreen == Screen.Game, // Drawer nur im GameScreen öffnen
-                drawerContent = {
-                    ModalDrawerSheet {
-                        ShopMenu(gameViewModel = gameViewModel)
-                    }
-                }
-            ) {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(stringResource(id = R.string.top_bar_title)) },
-                            navigationIcon = {
-                                when (currentScreen) {
-                                    Screen.Game -> {
-                                        // Options-Icon auf der linken Seite im GameScreen
-                                        IconButton(onClick = { currentScreen = Screen.Options }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Settings,
-                                                contentDescription = stringResource(R.string.options_title)
-                                            )
-                                        }
-                                    }
-
-                                    Screen.Options -> {
-                                        // Zurück-Icon auf der linken Seite im OptionsScreen
-                                        IconButton(onClick = { currentScreen = Screen.Game }) {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                                contentDescription = stringResource(R.string.back_button_description)
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                            actions = {
-                                // Shop-Button nur im GameScreen und jetzt allein in den Actions auf der rechten Seite
-                                if (currentScreen == Screen.Game) {
-                                    TextButton(
-                                        onClick = { scope.launch { drawerState.open() } }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.ShoppingCart,
-                                            contentDescription = stringResource(id = R.string.shop_title)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                        Text(stringResource(id = R.string.shop_title).uppercase())
-                                    }
-                                }
-                                // Optional: Wenn du noch andere Icons rechts haben möchtest, kämen sie hierher.
-                            }
-                        )
-                    }
-                ) { paddingValues ->
-                    // Wechsle den angezeigten Inhalt basierend auf currentScreen
-                    when (currentScreen) {
-                        is Screen.Game -> GameScreen(
-                            modifier = Modifier.padding(paddingValues),
-                            gameViewModel = gameViewModel,
-                            useDarkTheme = useDarkTheme
-                        )
-
-                        is Screen.Options -> OptionsScreen(
-                            modifier = Modifier.padding(paddingValues),
-                            themeViewModel = themeViewModel,
-                            gameViewModel = gameViewModel,
-                            currentThemeSetting = currentTheme // currentTheme direkt übergeben
-                        )
-                    }
-                }
+        // Back-Handler Logik
+        BackHandler(enabled = drawerState.isOpen && currentScreen == Screen.Game) { // Nur für Drawer im GameScreen        scope.launch {
+            scope.launch {
+                drawerState.close()
             }
         }
+        BackHandler(enabled = currentScreen == Screen.Options) { // Zurück vom OptionsScreen zum GameScreen
+            currentScreen = Screen.Game
+        }
+        // BackHandler zum Anzeigen des Exit-Dialogs (nur aktiv, wenn Drawer geschlossen ist)
+        BackHandler(enabled = drawerState.isClosed && currentScreen == Screen.Game && !showExitDialog) { // Verhindert erneutes Öffnen, wenn Dialog schon offen
+            showExitDialog = true
+        }
+
+        if (showExitDialog) {
+            val currentActivity =
+                LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
+            AlertDialog(
+                onDismissRequest = {
+                    showExitDialog = false
+                }, // Dialog schließen, wenn außerhalb geklickt wird
+                title = { Text(stringResource(id = R.string.exit_dialog_title)) },
+                text = { Text(stringResource(id = R.string.exit_dialog_text)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showExitDialog = false
+                        currentActivity?.finish() // Sicheres Aufrufen von finish()
+                    }) {
+                        Text(stringResource(id = R.string.exit_dialog_confirm_button))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showExitDialog = false }) {
+                        Text(stringResource(id = R.string.exit_dialog_dismiss_button))
+                    }
+                }
+            )
+        }
+
+
+
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            gesturesEnabled = false, // Drawer nur im GameScreen öffnen
+            drawerContent = {
+                ModalDrawerSheet {
+                    ShopMenu(
+                        gameViewModel = gameViewModel,
+                        onCloseClicked = {
+                            // Setze den aktuellen Bildschirm zurück zum Spiel
+                            scope.launch {
+                                drawerState.close() // <- Der entscheidende Aufruf!
+                            }
+                        }
+                    )
+                }
+            }
+        ) {
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = { Text(stringResource(id = R.string.top_bar_title)) },
+                        navigationIcon = {
+                            when (currentScreen) {
+                                Screen.Game -> {
+                                    // Options-Icon auf der linken Seite im GameScreen
+                                    IconButton(onClick = { currentScreen = Screen.Options }) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Settings,
+                                            contentDescription = stringResource(R.string.options_title)
+                                        )
+                                    }
+                                }
+
+                                Screen.Options -> {
+                                    // Zurück-Icon auf der linken Seite im OptionsScreen
+                                    IconButton(onClick = { currentScreen = Screen.Game }) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            contentDescription = stringResource(R.string.back_button_description)
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        actions = {
+                            // Shop-Button nur im GameScreen und jetzt allein in den Actions auf der rechten Seite
+                            if (currentScreen == Screen.Game) {
+                                TextButton(
+                                    onClick = { scope.launch { drawerState.open() } }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.ShoppingCart,
+                                        contentDescription = stringResource(id = R.string.shop_title)
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(stringResource(id = R.string.shop_title).uppercase())
+                                }
+                            }
+                            // Optional: Wenn du noch andere Icons rechts haben möchtest, kämen sie hierher.
+                        }
+                    )
+                }
+            ) { paddingValues ->
+                        // Wechsle den angezeigten Inhalt basierend auf currentScreen
+                        when (currentScreen) {
+                            is Screen.Game -> GameScreen(
+                                modifier = Modifier.padding(paddingValues),
+                                gameViewModel = gameViewModel,
+                                useDarkTheme = useDarkTheme
+                            )
+
+                            is Screen.Options -> OptionsScreen(
+                                modifier = Modifier.padding(paddingValues),
+                                themeViewModel = themeViewModel,
+                                gameViewModel = gameViewModel,
+                                currentThemeSetting = currentTheme // currentTheme direkt übergeben
+                            )
+                        }
+                    }
+
+            }
+}
+
 
 
 @SuppressLint("ViewModelConstructorInComposable")

@@ -98,5 +98,6 @@
     <string name="reset_dialog_dismiss_button">Cancel</string>
     <string name="credits_title">Credits</string>
     <string name="credits_text">Background Design: Yegitu\nCode of App: Aerodymeus</string>
+    <string name="shop_close_button">Back</string>
 
 </resources>
