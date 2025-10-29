@@ -57,7 +57,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext // Sicherstellen, dass dieser Import da ist
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -67,7 +66,14 @@ import dev.aerodymeus.aerpclicker.R
 import dev.aerodymeus.aerpclicker.ThemeViewModel
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import dev.aerodymeus.aerpclicker.BuildConfig
 
+
+
+@Composable
+fun getAppVersion(): String {
+    return BuildConfig.VERSION_NAME
+}
 
 
 enum class ThemeSetting {
@@ -207,6 +213,15 @@ fun OptionsScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
+        // Spacer, um die Versionsnummer vom Rest abzuheben.
+        Spacer(Modifier.weight(1f))
+
+        // Die App-Version anzeigen
+        Text(
+            text = stringResource(R.string.app_version, getAppVersion()),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Etwas unauffälliger
+        )
     }
 }
 

@@ -115,5 +115,6 @@
     <string name="credits_title">Credits</string>
     <string name="credits_text">Background Design: Yegitu\nCode of App: Aerodymeus</string>
     <string name="shop_close_button">Zurück</string>
+    <string name="app_version">Version %1$s</string>
 
 </resources>
