@@ -44,6 +44,9 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 import android.app.Application // Sicherstellen, dass dieser Import da ist
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -67,6 +70,10 @@ import dev.aerodymeus.aerpclicker.ThemeViewModel
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import dev.aerodymeus.aerpclicker.BuildConfig
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 
 
 
@@ -105,6 +112,37 @@ fun OptionsScreen(
     currentThemeSetting: ThemeSetting, // Den aktuellen Wert direkt empfangen
 ) {
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val feedbackData by gameViewModel.feedbackEvent.collectAsState()
+
+    // NEU: LaunchedEffect, der reagiert, wenn feedbackData nicht null ist
+    LaunchedEffect(feedbackData) {
+        feedbackData?.let { data ->
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                this.data = Uri.parse("mailto:") // Nur E-Mail-Apps
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(data.recipient))
+                putExtra(Intent.EXTRA_SUBJECT, data.subject)
+                putExtra(Intent.EXTRA_TEXT, data.body)
+            }
+
+            // Sicherstellen, dass eine App existiert, die den Intent verarbeiten kann
+            try {
+                if (intent.resolveActivity(context.packageManager) != null) {
+                    context.startActivity(intent)
+                } else {
+                    // WICHTIG: Gib dem Nutzer Feedback, wenn keine E-Mail-App gefunden wurde
+                    Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                // Fange unerwartete Fehler ab
+                Toast.makeText(context, "Could not open email app.", Toast.LENGTH_SHORT).show()
+            } finally {
+                // Setze das Event zurück, damit es nicht erneut ausgelöst wird
+                gameViewModel.onFeedbackEventHandled()
+            }
+        }
+    }
+
 
     Column(
         modifier = modifier
@@ -197,7 +235,22 @@ fun OptionsScreen(
                 }
             )
         }
-            // Hier könntest du weitere Optionen hinzufügen
+
+        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
+
+        Text(
+            text = stringResource(R.string.feedback_title), // Neuer Titel für Spieldaten-Optionen
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        OutlinedButton( // Oder Button, je nach gewünschtem Stil
+            onClick = { gameViewModel.onSendFeedbackClicked() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(R.string.feedback_button))
+        }
+
+        // Hier könntest du weitere Optionen hinzufügen
             // Spacer(Modifier.height(24.dp))
             // Text("Weitere Option...")
         Spacer(Modifier.height(32.dp)) // Abstand hinzufügen

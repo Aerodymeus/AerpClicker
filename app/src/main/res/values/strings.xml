@@ -116,5 +116,7 @@
     <string name="credits_text">Background Design: Yegitu\nCode of App: Aerodymeus</string>
     <string name="shop_close_button">Zurück</string>
     <string name="app_version">Version %1$s</string>
+    <string name="feedback_title">Feedback</string>
+    <string name="feedback_button">Feedback geben</string>
 
 </resources>

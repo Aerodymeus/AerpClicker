@@ -16,6 +16,16 @@ import kotlin.math.pow // Ändern von kotlin.math.pow zu pow
 import kotlin.math.roundToInt // Ändern von kotlin.math.roundToInt zu roundToInt
 import kotlin.math.max // Ändern von kotlin.math.max zu max
 import androidx.datastore.preferences.core.edit // Für das Schreiben der Preferences
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import androidx.lifecycle.ViewModel
+import dev.aerodymeus.aerpclicker.BuildConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -95,6 +105,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     // In GameViewModel.kt
     private var lastUiUpdateTime = 0L
     private val uiUpdateInterval = 100L // Millisekunden, z.B. 100ms = 10 UI-Updates pro Sekunde
+
+    //Feedback-Event hinzufügen
+    private val _feedbackEvent = MutableStateFlow<FeedbackData?>(null)
+    val feedbackEvent: StateFlow<FeedbackData?> = _feedbackEvent.asStateFlow()
+    // Datenklasse zur Aufnahme der E-Mail-Daten
+    data class FeedbackData(val recipient: String, val subject: String, val body: String)
+
+
 
     init {
         // updateDisplayedScore() // Wird jetzt in loadGameData() und handleScoreChangeWithImmediateUpdate() gemacht
@@ -487,6 +505,31 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun onSendFeedbackClicked() {
+        // App-Version und Geräteinformationen sammeln
+        val bodyText = """
+
+            --------------------
+            Bitte löschen Sie diese Informationen nicht.
+            Do not delete this information.
+
+            App Version: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
+            Android Version: ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})
+            Device: ${Build.MANUFACTURER} ${Build.MODEL}
+            --------------------
+        """.trimIndent()
+
+        val subject = "Feedback for Aerp Clicker v${BuildConfig.VERSION_NAME}"
+        val recipient = "aerpclicker@aerodymeus.de"
+
+        // Das Event auslösen, indem der State aktualisiert wird
+        _feedbackEvent.update { FeedbackData(recipient, subject, bodyText) }
+    }
+
+    // NEU: Eine Funktion, um das Event zurückzusetzen, nachdem es verarbeitet wurde
+    fun onFeedbackEventHandled() {
+        _feedbackEvent.update { null }
+    }
 
 
     override fun onCleared() {

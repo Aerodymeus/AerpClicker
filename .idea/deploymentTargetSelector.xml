@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="Aerp Clicker">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-10-29T22:36:29.245891500Z">
+        <DropdownSelection timestamp="2025-11-01T17:33:26.202627600Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Aero\.android\avd\Medium_Phone_2.avd" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\Aero\.android\avd\Medium_Phone.avd" />
             </handle>
           </Target>
         </DropdownSelection>

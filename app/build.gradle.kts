@@ -15,8 +15,8 @@ android {
         applicationId = "dev.aerodymeus.aerpclicker"
         minSdk = 30
         targetSdk = 36
-        versionCode = 12
-        versionName = "0.2.5"
+        versionCode = 13
+        versionName = "0.2.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -81,4 +81,5 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences) // Überprüfe die neueste Version
     implementation(libs.androidx.lifecycle.viewmodel.ktx) // Überprüfe die neueste Version
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 }
