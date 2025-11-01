@@ -20,7 +20,7 @@ A simple yet addictive clicker game for Android, developed with Jetpack Compose!
 
 | Light Mode | Dark Mode |
 |---|---|
-| <!-- Add screenshot of light mode here --> | <!-- Add screenshot of dark mode here --> |
+| ![Screenshot of Light Mode](Pictures/Screenshot_light_mode.png) | ![Screenshot of Dark Mode](Pictures/Screenshot_dark_mode.png) |
 
 ## 🛠️ Built With
 
