@@ -1,31 +1,26 @@
 package dev.aerodymeus.aerpclicker // Or the correct package
 
-import android.app.Application // Ändern von AndroidViewModel zu Application
-import androidx.compose.runtime.getValue // Ändern von mutableStateOf zu getValue
-import androidx.compose.runtime.mutableDoubleStateOf // Ändern von mutableStateOf zu mutableDoubleStateOf
-import androidx.compose.runtime.mutableIntStateOf // Ändern von mutableStateOf zu mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf // Ändern von mutableStateOf zu mutableStateOf
-import androidx.compose.runtime.setValue // Ändern von mutableStateOf zu setValue
-import androidx.lifecycle.AndroidViewModel // Ändern von ViewModel zu AndroidViewModel
-import androidx.lifecycle.viewModelScope // Ändern von ViewModelScope zu viewModelScope
-import kotlinx.coroutines.Job // Ändern von Job zu kotlinx.coroutines.Job
-import kotlinx.coroutines.delay // Ändern von kotlinx.coroutines.delay zu delay
-import kotlinx.coroutines.flow.first // Ändern von kotlinx.coroutines.flow.first zu first
-import kotlinx.coroutines.launch // Ändern von kotlinx.coroutines.launch zu launch
-import kotlin.math.pow // Ändern von kotlin.math.pow zu pow
-import kotlin.math.roundToInt // Ändern von kotlin.math.roundToInt zu roundToInt
-import kotlin.math.max // Ändern von kotlin.math.max zu max
-import androidx.datastore.preferences.core.edit // Für das Schreiben der Preferences
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
+import android.app.Application
 import android.os.Build
-import androidx.lifecycle.ViewModel
-import dev.aerodymeus.aerpclicker.BuildConfig
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {

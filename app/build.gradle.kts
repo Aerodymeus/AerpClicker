@@ -22,13 +22,15 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            ndk.debugSymbolLevel = "FULL" // Oder "SYMBOL_TABLE"
+            ndk {
+                debugSymbolLevel = "FULL"
+            }
         }
     }
     compileOptions {
@@ -81,5 +83,5 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences) // Überprüfe die neueste Version
     implementation(libs.androidx.lifecycle.viewmodel.ktx) // Überprüfe die neueste Version
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+    implementation(libs.kotlinx.coroutines.core)
 }
