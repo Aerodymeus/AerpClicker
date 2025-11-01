@@ -16,6 +16,12 @@ A simple yet addictive clicker game for Android, developed with Jetpack Compose!
 *   **Modern UI:** Developed with Jetpack Compose for a declarative and responsive user interface.
 *   **Localization:** Available in German and English.
 
+## 📸 Screenshots
+
+| Light Mode | Dark Mode |
+|---|---|
+| <!-- Add screenshot of light mode here --> | <!-- Add screenshot of dark mode here --> |
+
 ## 🛠️ Built With
 
 *   [Kotlin](https://kotlinlang.org/)
@@ -24,3 +30,30 @@ A simple yet addictive clicker game for Android, developed with Jetpack Compose!
     *   [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) for UI logic and state management
     *   [Material Design 3](https://m3.material.io/) Components
 *   [Gradle](https://gradle.org/) for the build system
+
+## 🚀 Getting Started
+
+To get a local copy up and running, follow these simple steps.
+
+### Prerequisites
+
+*   Android Studio Iguana | 2023.2.1 or later
+*   Gradle 8.0 or later
+
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
