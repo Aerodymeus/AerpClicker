@@ -39,14 +39,13 @@
 
         <!-- For the hint that a base item is required -->
         <string name="shop_item_requires_base_prefix">Requires: </string>
-        <string name="shop_item_requires_base_suffix"> </string>
 
-        <!-- Updated descriptions for the Aerp Factory -->
+    <!-- Updated descriptions for the Aerp Factory -->
         <string name="shop_item_aerp_factory_description_active">The factory is now producing additional Aerps!</string>
         <string name="shop_item_aerp_factory_description_inactive">Buy a factory that produces %.1f Aerps per cycle.</string>
 
         <!-- Descriptions for Shop-Items -->
-        <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
+    <string name="shop_item_double_aerps_description">Doubles the amount of Aerps you receive per click.</string>
         <string name="shop_item_auto_aerper_description">Automatically clicks for you every %.1f seconds.</string>
 
         <string name="shop_item_level_prefix">"Level: "</string>
@@ -63,7 +62,6 @@
 
 
     <string name="shop_item_current_interval_prefix">Current Interval: </string>
-    <string name="shop_item_current_interval_suffix">s</string>
     <string name="shop_item_max_level_button">Max Level</string>
     <string name="shop_item_multiplier_prefix">Current Bonus: </string>
     <string name="shop_item_production_prefix">Production: </string>

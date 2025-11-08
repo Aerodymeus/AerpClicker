@@ -47,7 +47,7 @@
 
     <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
     <string name="shop_item_requires_base_prefix">Benötigt: </string>
-    <string name="shop_item_requires_base_suffix"> </string>
+    <string name="shop_item_requires_base_suffix" translatable="false"> </string>
 
    <!-- ... andere Strings ... -->
 
@@ -75,7 +75,7 @@
     </string>
 
     <string name="shop_item_current_interval_prefix">Aktuelles Intervall: </string>
-    <string name="shop_item_current_interval_suffix">s</string>
+    <string name="shop_item_current_interval_suffix" translatable="false">s</string>
     <string name="shop_item_max_level_button">Max. Level</string>
     <!-- Stelle sicher, dass shop_item_multiplier_prefix und shop_item_production_prefix nur Text sind,
              da die Formatierung in UI.kt erfolgt -->

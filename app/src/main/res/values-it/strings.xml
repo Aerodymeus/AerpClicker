@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="get_aerps_text">Ottieni Aerps!</string>
+    <string name="duplicate_aerps_label">Aerps doppi</string>
+
+    <string name="menu_content_description">Apri menu</string>
+
+    <string name="click_me_button">Ottieni Aerps!</string>
+    <string name="cooldown_auto_clicker_prefix">Auto-Clicker: </string>
+    <string name="cooldown_aerp_factory_prefix">Fabbrica di Aerp: </string>
+
+    <string name="game_background_image_description">Immagine di sfondo che mostra un lupo che preme un pulsante</string>
+
+    <string name="shop_title">Miglioramenti</string>
+    <string name="shop_item_double_aerps">Aerps doppi</string>
+    <string name="shop_item_auto_aerper">Auto-Aerper</string>
+
+    <string name="shop_item_cost_prefix">Costo: </string>
+    <string name="shop_item_status_active">Attivo</string>
+    <string name="shop_item_status_inactive">Inattivo</string>
+    <string name="shop_item_buy_button">Compra</string>
+    <string name="shop_item_bought_button">Acquistato</string>
+
+    <string name="shop_item_aerp_factory">Fabbrica di Aerp</string>
+    <string name="shop_item_aerp_factory_description_active">La fabbrica ora produce Aerps aggiuntivi!</string>
+    <string name="shop_item_aerp_factory_description_inactive">Compra una fabbrica che produce %.1f Aerps per ciclo.</string>
+
+    <string name="shop_item_factory_upgrade">Potenziamento fabbrica</string>
+    <string name="shop_item_factory_upgrade_description_active">La fabbrica ora produce Aerps aggiuntivi!</string>
+    <string name="shop_item_factory_upgrade_description_available">Aumenta la produzione della tua fabbrica di altri 5 Aerps per ciclo.</string>
+    <string name="shop_item_factory_upgrade_description_requires_factory">Hai bisogno prima di una Fabbrica di Aerp per acquistare questo potenziamento.</string>
+    <string name="shop_item_buy_button_requires_base">Compra (Richiede base)</string>
+
+    <string name="shop_item_production_suffix"> Aerps/ciclo</string>
+    <string name="shop_item_requires_base_prefix">Richiede: </string>
+
+    <string name="shop_item_double_aerps_description">Raddoppia il numero di Aerps che ricevi per clic.</string>
+    <string name="shop_item_auto_aerper_description">Clicca automaticamente per te ogni %.1f secondi.</string>
+
+    <string name="shop_item_level_prefix">Livello: </string>
+    <string name="shop_item_upgrade_button">Migliora</string>
+
+    <string name="shop_item_click_boost">Potenziatore di Aerp</string>
+    <string name="shop_item_click_boost_description">Aumenta gli Aerps per clic del 20%.</string>
+
+    <string name="shop_item_auto_clicker_interval_upgrade">Clicker più veloce</string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description">Riduce l\'intervallo dell\'auto-clicker del 10%%. Attuale: %.1fs</string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Velocità massima raggiunta (%.1fs)!</string>
+    <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Richiede Auto-Clicker attivo.</string>
+
+    <string name="shop_item_current_interval_prefix">Intervallo attuale: </string>
+    <string name="shop_item_max_level_button">Liv. max</string>
+
+    <string name="shop_item_multiplier_prefix">Bonus attuale: </string>
+    <string name="shop_item_production_prefix">Produzione: </string>
+
+    <string name="shop_item_factory_production_upgrade">Aumento produzione</string>
+    <string name="shop_item_factory_production_upgrade_description_active">La fabbrica ora produce %.1f Aerps aggiuntivi!</string>
+    <string name="shop_item_factory_production_upgrade_description_available">Aumenta la produzione della tua fabbrica di altri %.1f Aerps per ciclo.</string>
+    <string name="shop_item_factory_production_upgrade_description_requires_factory">Hai bisogno prima di una Fabbrica di Aerp.</string>
+
+    <string name="shop_item_factory_interval_upgrade">Fabbrica più veloce</string>
+    <string name="shop_item_factory_interval_upgrade_description">Riduce l\'intervallo della fabbrica del 10%%. Attuale: %.1fs</string>
+    <string name="shop_item_factory_interval_upgrade_description_max_reached">Velocità massima raggiunta (%.1fs)!</string>
+    <string name="shop_item_factory_interval_upgrade_requires_factory">Richiede Fabbrica di Aerp attiva.</string>
+
+    <string name="shop_item_current_bonus_prefix">Bonus totale attuale: </string>
+
+    <string name="exit_dialog_title">Uscire dall\'app?</string>
+    <string name="exit_dialog_text">Vuoi davvero uscire da Aerp Clicker?</string>
+    <string name="exit_dialog_confirm_button">Esci</string>
+    <string name="exit_dialog_dismiss_button">Annulla</string>
+
+    <string name="options_title">Impostazioni</string>
+    <string name="theme_selection_title">Tema dell\'app</string>
+    <string name="theme_light">Chiaro</string>
+    <string name="theme_dark">Scuro</string>
+    <string name="theme_system">Predefinito di sistema</string>
+    <string name="back_button_description">Indietro</string>
+
+    <string name="game_data_title">Dati di gioco</string>
+    <string name="reset_game_progress_button">Reimposta progressi</string>
+    <string name="reset_dialog_title">Reimpostare i progressi?</string>
+    <string name="reset_dialog_message">Sei sicuro di voler eliminare permanentemente tutti i tuoi progressi? Tutti gli Aerps e i miglioramenti andranno persi.</string>
+    <string name="reset_dialog_confirm_button">Reimposta</string>
+    <string name="reset_dialog_dismiss_button">Annulla</string>
+
+    <string name="credits_title">Crediti</string>
+    <string name="credits_text">Design dello sfondo: Yegitu\nCodice dell\'app: Aerodymeus</string>
+    <string name="shop_close_button">Indietro</string>
+    <string name="app_version">Versione %1$s</string>
+    <string name="feedback_title">Feedback</string>
+    <string name="feedback_button">Invia feedback</string>
+</resources>
