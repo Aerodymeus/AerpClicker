@@ -21,6 +21,11 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.roundToInt
+import android.app.NotificationManager
+import android.content.Context
+import androidx.core.app.NotificationCompat
+//import androidx.privacysandbox.tools.core.generator.build
+import dev.aerodymeus.aerpclicker.Notification.Companion.UPDATE_CHANNEL_ID
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -112,7 +117,49 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     init {
         // updateDisplayedScore() // Wird jetzt in loadGameData() und handleScoreChangeWithImmediateUpdate() gemacht
         loadGameData() // Lade den Spielstand beim Start
+        checkForAppUpdate()
     }
+
+    private fun checkForAppUpdate() {
+        viewModelScope.launch {
+            val prefs = dataStore.data.first()
+            val lastKnownVersionCode = prefs[GameStateKeys.LAST_KNOWN_VERSION_CODE] ?: 0
+            val currentVersionCode = BuildConfig.VERSION_CODE
+
+            if (currentVersionCode > lastKnownVersionCode) {
+                // Ein Update wurde erkannt!
+                showUpdateNotification()
+
+                // Speichere die neue Version, um die Benachrichtigung nicht erneut zu zeigen
+                dataStore.edit { settings ->
+                    settings[GameStateKeys.LAST_KNOWN_VERSION_CODE] = currentVersionCode
+                }
+            }
+        }
+    }
+
+    private fun showUpdateNotification() {
+        val context = getApplication<Application>().applicationContext
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notification = NotificationCompat.Builder(context, UPDATE_CHANNEL_ID)
+            .setSmallIcon(R.drawable.aerp_button_vektor) // WICHTIG: Erstelle eine kleine, weiße Icon-Datei
+            .setContentTitle(context.getString(R.string.aerp_clicker_update_title))
+            .setContentText(
+                context.getString(
+                    R.string.aerp_clicker_update_desc,
+                    BuildConfig.VERSION_NAME
+                ))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true) // Schließt die Benachrichtigung bei Klick
+            .build()
+
+        // ID 1 ist willkürlich, aber eindeutig für diese Benachrichtigung
+        notificationManager.notify(1, notification)
+    }
+
+
+
 
     //GameSave
     private fun loadGameData() {
@@ -534,4 +581,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         saveGameData() // Daten speichern
         updateDisplayedScore() // Ensure final score is displayed
     }
+
+
+
 }

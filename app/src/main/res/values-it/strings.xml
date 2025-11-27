@@ -91,4 +91,6 @@
     <string name="app_version">Versione %1$s</string>
     <string name="feedback_title">Feedback</string>
     <string name="feedback_button">Invia feedback</string>
+    <string name="aerp_clicker_update_title">Aerp Clicker è stato aggiornato!</string>
+    <string name="aerp_clicker_update_desc">Benvenuti alla versione %1$s. Scopri le nuove funzionalità!</string>
 </resources>

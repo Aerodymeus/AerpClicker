@@ -82,6 +82,10 @@ import dev.aerodymeus.aerpclicker.R
 import dev.aerodymeus.aerpclicker.ThemeViewModel
 import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 import kotlinx.coroutines.launch
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 
 @Composable
@@ -781,8 +785,8 @@ fun AerpClickerApp(
     }
 
 
-    // Wende das Theme dynamisch an
 
+    // Wende das Theme dynamisch an
         AerpClickerTheme(darkTheme = useDarkTheme) {
 //            ThemeSetting.LIGHT -> false
 //            ThemeSetting.DARK -> true
@@ -936,6 +940,24 @@ fun AerpClickerApp(
                     }
 
             }
+
+    // Launcher für die Notification-Berechtigung
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            // Hier könntest du auf das Ergebnis reagieren, falls nötig
+            // z.B. eine Info anzeigen, wenn die Berechtigung verweigert wurde.
+        }
+    )
+
+    // Effekt, der die Berechtigung beim ersten Start anfragt
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+
 }
 
 

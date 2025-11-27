@@ -70,4 +70,6 @@
     <string name="app_version">Versie %1$s</string>
     <string name="feedback_title">Feedback</string>
     <string name="feedback_button">Feedback geven</string>
+    <string name="aerp_clicker_update_title">Aerp Clicker is bijgewerkt!</string>
+    <string name="aerp_clicker_update_desc">Welkom bij versie %1$s. Ontdek de nieuwe functies!</string>
 </resources>

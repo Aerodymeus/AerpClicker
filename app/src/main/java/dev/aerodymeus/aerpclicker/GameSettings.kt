@@ -28,6 +28,8 @@ object GameStateKeys {
     val FACTORY_INTERVAL_UPGRADE_LEVEL = intPreferencesKey("factory_interval_upgrade_level")
     // passiveScoreGeneratorCost, factoryProductionUpgradeCost, factoryIntervalUpgradeCost werden abgeleitet
     // effectivePassiveScoreAmount und passiveGeneratorInterval werden von ihren Leveln abgeleitet
+
+    val LAST_KNOWN_VERSION_CODE = intPreferencesKey("last_known_version_code")
 }
 
 object AppThemeKeys {

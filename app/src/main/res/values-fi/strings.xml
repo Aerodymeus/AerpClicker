@@ -70,4 +70,6 @@
     <string name="app_version">Versio %1$s</string>
     <string name="feedback_title">Palaute</string>
     <string name="feedback_button">Anna palautetta</string>
+    <string name="aerp_clicker_update_title">Aerp Clicker on päivitetty!</string>
+    <string name="aerp_clicker_update_desc">Tervetuloa versioon %1$s. Tutustu uusiin ominaisuuksiin!</string>
 </resources>

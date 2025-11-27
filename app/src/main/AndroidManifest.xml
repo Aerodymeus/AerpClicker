@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="dev.aerodymeus.aerpclicker">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="true"
@@ -11,7 +12,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/aerp_button_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AerpClicker">
+        android:theme="@style/Theme.AerpClicker"
+        android:name=".Notification">
         <activity
             android:name="dev.aerodymeus.aerpclicker.ui.UI"
             android:exported="true"
