@@ -72,4 +72,12 @@
     <string name="feedback_button">Anna palautetta</string>
     <string name="aerp_clicker_update_title">Aerp Clicker on päivitetty!</string>
     <string name="aerp_clicker_update_desc">Tervetuloa versioon %1$s. Tutustu uusiin ominaisuuksiin!</string>
+    <string name="language_selection_title">Sovelluksen kieli</string>
+    <string name="language_german">Saksa</string>
+    <string name="language_english">Englanti</string>
+    <string name="language_spanish">Espanja</string>
+    <string name="language_french">Ranska</string>
+    <string name="language_italian">Italia</string>
+    <string name="language_dutch">Hollanti</string>
+    <string name="language_finnish">Suomi</string>
 </resources>

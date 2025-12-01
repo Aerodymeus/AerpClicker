@@ -1,18 +1,16 @@
 <resources>
-    <string name="app_name" translatable="false">Aerp Clicker</string>
     <string name="get_aerps_text">Bekomme Aerps!</string>
     <string name="duplicate_aerps_label">Doppelte Aerps</string> <!-- Für den App-Titel in der Manifest-Datei und ggf. anderswo -->
 
     <!-- UI.kt - AerpClickerApp -->
-    <string name="top_bar_title" translatable="false">Aerp Clicker</string>
     <string name="menu_content_description">Menü öffnen</string>
 
     <!-- UI.kt - GameScreen -->
-    <string name="score_text" translatable="false">Aerps: %1$d</string> <!-- Prefix für den Punktestand -->
+    <!-- Prefix für den Punktestand -->
     <string name="click_me_button">Bekomme Aerps!</string>
     <string name="cooldown_auto_clicker_prefix">Auto-Klicker: </string>
     <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik: </string>
-    <string name="cooldown_suffix" translatable="false">s</string> <!-- Suffix für Sekunden -->
+    <!-- Suffix für Sekunden -->
     <string name="game_background_image_description">Hintergrundbild zeigt einen Wolf, der einen Knopf drückt</string>
 
     <!-- UI.kt - ShopMenu -->
@@ -23,12 +21,11 @@
 
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten: </string>
-    <string name="shop_item_cost_suffix" translatable="false"> Aerps</string>
     <string name="shop_item_status_active">Aktiv</string>
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
-#
+    #
     <!-- die Aerp-Fabrik -->
     <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
     <string name="shop_item_aerp_factory_description_active">Die Fabrik produziert jetzt zusätzliche Aerps!</string>
@@ -47,9 +44,8 @@
 
     <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
     <string name="shop_item_requires_base_prefix">Benötigt: </string>
-    <string name="shop_item_requires_base_suffix" translatable="false"> </string>
 
-   <!-- ... andere Strings ... -->
+    <!-- ... andere Strings ... -->
 
     <!-- Beschreibungen für Shop-Items -->
     <string name="shop_item_double_aerps_description">"Verdoppelt die Anzahl der Aerps, die du pro Klick erhältst.     "</string>
@@ -75,7 +71,6 @@
     </string>
 
     <string name="shop_item_current_interval_prefix">Aktuelles Intervall: </string>
-    <string name="shop_item_current_interval_suffix" translatable="false">s</string>
     <string name="shop_item_max_level_button">Max. Level</string>
     <!-- Stelle sicher, dass shop_item_multiplier_prefix und shop_item_production_prefix nur Text sind,
              da die Formatierung in UI.kt erfolgt -->
@@ -98,14 +93,14 @@
     <string name="exit_dialog_text">Möchtest du Aerp Clicker wirklich beenden?</string>
     <string name="exit_dialog_confirm_button">Beenden</string>
     <string name="exit_dialog_dismiss_button">Abbrechen</string>
-<!-- In res/values/strings.xml (und values-en/strings.xml) -->
+    <!-- In res/values/strings.xml (und values-en/strings.xml) -->
     <string name="options_title">Einstellungen</string>
     <string name="theme_selection_title">App-Design</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">Systemstandard</string>
     <string name="back_button_description">Zurück</string>
-<!-- In res/values/strings.xml (und values-en/strings.xml) -->
+    <!-- In res/values/strings.xml (und values-en/strings.xml) -->
     <string name="game_data_title">Spieldaten</string>
     <string name="reset_game_progress_button">Spielstand zurücksetzen</string>
     <string name="reset_dialog_title">Spielstand zurücksetzen?</string>
@@ -128,7 +123,6 @@
     <string name="language_italian">Italienisch</string>
     <string name="language_dutch">Niederländisch</string>
     <string name="language_finnish">Finnisch</string>
-
 
 
 </resources>

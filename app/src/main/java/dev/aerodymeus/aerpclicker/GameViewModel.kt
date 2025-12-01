@@ -177,7 +177,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 // Dies vermeidet das Speichern von abgeleiteten Werten
                 var tempClickMultiplier = baseClickValue
                 var tempClickBoostCost = 50 // Startkosten
-                (0 until loadedClickBoostLevel).forEach { i ->
+                (0 until loadedClickBoostLevel).forEach { _ ->
                     tempClickMultiplier *= 1.2
                     tempClickBoostCost = (tempClickBoostCost * 1.5).roundToInt()
                 }
@@ -201,7 +201,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             if (loadedAutoClickerIntervalLevel > 0 || autoClickerBought) { // Wenn Basis gekauft oder schon gelevelt
                 var tempAutoClickerInterval = 10.0 // Startintervall
                 var tempAutoClickerIntervalCost = 150 // Startkosten für Upgrade
-                (0 until loadedAutoClickerIntervalLevel).forEach { i ->
+                (0 until loadedAutoClickerIntervalLevel).forEach { _ ->
                     tempAutoClickerInterval = max(minAutoClickerInterval, tempAutoClickerInterval * (1 - autoClickerIntervalReductionPercentage))
                     tempAutoClickerIntervalCost = (tempAutoClickerIntervalCost * 1.3).roundToInt()
                 }
@@ -251,7 +251,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             var tempFactoryIntervalUpgradeCost = 250 // Startkosten
 
             if (passiveGeneratorBought || loadedFactoryIntervalLevel > 0) {
-                (0 until loadedFactoryIntervalLevel).forEach { i ->
+                (0 until loadedFactoryIntervalLevel).forEach { _ ->
                     tempPassiveGeneratorInterval = max(minPassiveGeneratorInterval, tempPassiveGeneratorInterval * (1 - passiveGeneratorIntervalReductionPercentage))
                     tempFactoryIntervalUpgradeCost = (tempFactoryIntervalUpgradeCost * 1.3).roundToInt()
                 }

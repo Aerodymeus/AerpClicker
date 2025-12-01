@@ -72,4 +72,13 @@
     <string name="feedback_button">Feedback geven</string>
     <string name="aerp_clicker_update_title">Aerp Clicker is bijgewerkt!</string>
     <string name="aerp_clicker_update_desc">Welkom bij versie %1$s. Ontdek de nieuwe functies!</string>
+    <string name="language_selection_title">App-taal</string>
+    <string name="language_german">Duits</string>
+    <string name="language_english">Engels</string>
+    <string name="language_spanish">Spaans</string>
+    <string name="language_french">Frans</string>
+    <string name="language_italian">Italiaans</string>
+    <string name="language_dutch">Nederlands</string>
+    <string name="language_finnish">Fins</string>
+
 </resources>

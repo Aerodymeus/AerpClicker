@@ -102,5 +102,13 @@
     <string name="feedback_button">give Feedback</string>
     <string name="aerp_clicker_update_title">Aerp Clicker has been updated!</string>
     <string name="aerp_clicker_update_desc">Welcome to version %1$s. Discover the new features!</string>
+    <string name="language_selection_title">App-Language</string>
+    <string name="language_german">German</string>
+    <string name="language_english">English</string>
+    <string name="language_spanish">Spanish</string>
+    <string name="language_french">French</string>
+    <string name="language_italian">Italian</string>
+    <string name="language_dutch">Dutch</string>
+    <string name="language_finnish">Finnish</string>
 
 </resources>

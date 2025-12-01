@@ -86,6 +86,10 @@ import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.TextField
 
 
 @Composable
@@ -115,12 +119,13 @@ class UI : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsScreen(
     modifier: Modifier = Modifier,
     themeViewModel: ThemeViewModel,
     gameViewModel: GameViewModel,
-    currentThemeSetting: ThemeSetting, // Den aktuellen Wert direkt empfangen
+    currentThemeSetting: ThemeSetting,
 ) {
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -144,7 +149,7 @@ fun OptionsScreen(
                     // WICHTIG: Gib dem Nutzer Feedback, wenn keine E-Mail-App gefunden wurde
                     Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 // Fange unerwartete Fehler ab
                 Toast.makeText(context, "Could not open email app.", Toast.LENGTH_SHORT).show()
             } finally {
@@ -173,31 +178,101 @@ fun OptionsScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Radio Buttons für Theme-Auswahl
-        ThemeSetting.entries.forEach { setting -> // ThemeSetting.values() für ältere Kotlin-Versionen
-            Row(
-                Modifier
+        var isThemeDropdownExpanded by remember { mutableStateOf(false) }
+
+        // Die Box, die das Textfeld und das Dropdown-Menü zusammenhält
+        ExposedDropdownMenuBox(
+            expanded = isThemeDropdownExpanded,
+            onExpandedChange = { isThemeDropdownExpanded = it },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Das Textfeld, das die aktuell ausgewählte Option anzeigt
+            TextField(
+                value = when (currentThemeSetting) {
+                    ThemeSetting.LIGHT -> stringResource(R.string.theme_light)
+                    ThemeSetting.DARK -> stringResource(R.string.theme_dark)
+                    ThemeSetting.SYSTEM -> stringResource(R.string.theme_system)
+                },
+                onValueChange = {}, // Leer lassen, da das Feld nur anzeigt
+                readOnly = true,    // Verhindert, dass der Nutzer Text eingibt
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isThemeDropdownExpanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier
+                    .menuAnchor() // Wichtig, um das Menü am Textfeld auszurichten
                     .fillMaxWidth()
-                    .selectable(
-                        selected = (currentThemeSetting == setting),
-                        onClick = { themeViewModel.setThemeSetting(setting) }
-                    )
-                    .padding(vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            )
+
+            // Das eigentliche Dropdown-Menü, das bei Klick erscheint
+            ExposedDropdownMenu(
+                expanded = isThemeDropdownExpanded,
+                onDismissRequest = { isThemeDropdownExpanded = false }
             ) {
-                RadioButton(
-                    selected = (currentThemeSetting == setting),
-                    onClick = { themeViewModel.setThemeSetting(setting) }
-                )
-                Text(
-                    text = when (setting) {
-                        ThemeSetting.LIGHT -> stringResource(R.string.theme_light) // String Ressource
-                        ThemeSetting.DARK -> stringResource(R.string.theme_dark)   // String Ressource
-                        ThemeSetting.SYSTEM -> stringResource(R.string.theme_system) // String Ressource
-                    },
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+                // Ein Menüpunkt für jede Theme-Einstellung
+                ThemeSetting.entries.forEach { setting ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = when (setting) {
+                                    ThemeSetting.LIGHT -> stringResource(R.string.theme_light)
+                                    ThemeSetting.DARK -> stringResource(R.string.theme_dark)
+                                    ThemeSetting.SYSTEM -> stringResource(R.string.theme_system)
+                                }
+                            )
+                        },
+                        onClick = {
+                            themeViewModel.setThemeSetting(setting) // Aktion bei Auswahl
+                            isThemeDropdownExpanded = false // Menü schließen
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(16.dp)) // Abstand zwischen den Dropdowns
+
+
+        Text(
+            text = stringResource(R.string.language_selection_title), // Neuer Titel
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        var isLanguageDropdownExpanded by remember { mutableStateOf(false) }
+        val currentLanguage by themeViewModel.languageSetting.collectAsState()
+
+        ExposedDropdownMenuBox(
+            expanded = isLanguageDropdownExpanded,
+            onExpandedChange = { isLanguageDropdownExpanded = it },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            TextField(
+                value = stringResource(currentLanguage.toLanguage().nameResId),
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = isLanguageDropdownExpanded)
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+
+            ExposedDropdownMenu(
+                expanded = isLanguageDropdownExpanded,
+                onDismissRequest = { isLanguageDropdownExpanded = false }
+            ) {
+                LanguageSetting.entries.forEach { setting ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(setting.toLanguage().nameResId)) },
+                        onClick = {
+                            themeViewModel.setLanguage(setting)
+                            isLanguageDropdownExpanded = false
+                        }
+                    )
+                }
             }
         }
 
@@ -829,20 +904,18 @@ fun AerpClickerApp(
                 LocalActivity.current as? ComponentActivity // Hole die Activity-Referenz hier
             AlertDialog(
                 onDismissRequest = {
-                    showExitDialog = false
                 }, // Dialog schließen, wenn außerhalb geklickt wird
                 title = { Text(stringResource(id = R.string.exit_dialog_title)) },
                 text = { Text(stringResource(id = R.string.exit_dialog_text)) },
                 confirmButton = {
                     TextButton(onClick = {
-                        showExitDialog = false
                         currentActivity?.finish() // Sicheres Aufrufen von finish()
                     }) {
                         Text(stringResource(id = R.string.exit_dialog_confirm_button))
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showExitDialog = false }) {
+                    TextButton(onClick = { }) {
                         Text(stringResource(id = R.string.exit_dialog_dismiss_button))
                     }
                 }
@@ -944,7 +1017,7 @@ fun AerpClickerApp(
     // Launcher für die Notification-Berechtigung
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
+        onResult = { _ ->
             // Hier könntest du auf das Ergebnis reagieren, falls nötig
             // z.B. eine Info anzeigen, wenn die Berechtigung verweigert wurde.
         }
