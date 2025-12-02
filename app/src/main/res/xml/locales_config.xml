@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Deutsch -->
+    <locale android:name="de"/>
+    <!-- Englisch -->
+    <locale android:name="en"/>
+    <!-- Spanisch -->
+    <locale android:name="es"/>
+    <!-- Französisch -->
+    <locale android:name="fr"/>
+    <!-- Italienisch -->
+    <locale android:name="it"/>
+    <!-- Niederländisch -->
+    <locale android:name="nl"/>
+    <!-- Finnisch -->
+    <locale android:name="fi"/>
+</locale-config>

@@ -3,7 +3,6 @@ package dev.aerodymeus.aerpclicker
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.os.Build
 
 class Notification : Application() {
@@ -28,7 +27,7 @@ class Notification : Application() {
             }
             // Registriere den Channel beim System
             val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
