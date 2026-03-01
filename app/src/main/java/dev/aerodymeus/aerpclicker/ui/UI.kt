@@ -1,14 +1,20 @@
 package dev.aerodymeus.aerpclicker.ui
 
+import android.provider.Settings
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -43,11 +49,13 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -75,6 +83,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aerodymeus.aerpclicker.BuildConfig
@@ -141,6 +150,31 @@ fun OptionsScreen(
     var showResetConfirmationDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val feedbackData by gameViewModel.feedbackEvent.collectAsState()
+
+    // Status der Berechtigung tracken
+    var isNotificationEnabled by remember {
+        mutableStateOf(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true // Vor Android 13 immer an
+            }
+        )
+    }
+
+    // Der Launcher für den Dialog
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        isNotificationEnabled = isGranted
+        if (!isGranted) {
+            // Optional: Dem Nutzer sagen, dass er es in den System-Einstellungen ändern muss,
+            // falls er "Nie wieder fragen" geklickt hat.
+        }
+    }
 
     // NEU: LaunchedEffect, der reagiert, wenn feedbackData nicht null ist
     LaunchedEffect(feedbackData) {
@@ -252,7 +286,37 @@ fun OptionsScreen(
             }
         }
 
+        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
 
+        Text(text = stringResource(R.string.options_title), style = MaterialTheme.typography.headlineMedium)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // --- Benachrichtigungs-Option ---
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.options_notifications_title)) },
+                supportingContent = { Text(stringResource(R.string.options_notifications_desc)) },
+                trailingContent = {
+                    Switch(
+                        checked = isNotificationEnabled,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                // Wenn der User einschaltet, fragen wir nach der Berechtigung
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                // Wenn der User ausschaltet, schicken wir ihn in die Einstellungen,
+                                // da Apps sich Berechtigungen nicht selbst entziehen können.
+                                val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                }
+                                context.startActivity(intent)
+                            }
+                        }
+                    )
+                }
+            )
+        }
 
         Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
 
@@ -354,7 +418,7 @@ fun GameScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    // Box als äußerster com . google . android . gms . tagmanager . Container, um das Hintergrundbild und den Inhalt zu überlagern
+    // Box als äußerster com. google. android. gms. tagmanager. Container, um das Hintergrundbild und den Inhalt zu überlagern
     Box(modifier = modifier.fillMaxSize()) {
         // Prüfen, ob das dunkle Thema aktiv ist
         //val isDarkTheme = isSystemInDarkTheme()
@@ -831,6 +895,7 @@ fun AerpClickerApp(
     var showExitDialog by remember { mutableStateOf(false) }
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) }
     val activity = LocalContext.current as? ComponentActivity
+    val context = LocalContext.current
 
     // 2. Bestimme, ob der Dark Mode basierend auf der Einstellung verwendet werden soll
     val useDarkTheme = when (currentThemeSetting) {
@@ -839,6 +904,28 @@ fun AerpClickerApp(
         ThemeSetting.SYSTEM -> isSystemInDarkTheme()
     }
 
+
+    // Launcher für die Berechtigung
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // Hier könntest du den Status optional in einem DataStore speichern
+    }
+
+    // NEU: Abfrage beim allerersten Start der App
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val isGranted = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
+            if (!isGranted) {
+                // Dies triggert den System-Dialog beim ersten Start
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
 
 
     // 3. Wende das Theme zentral an. Alles andere ist darin verschachtelt.
