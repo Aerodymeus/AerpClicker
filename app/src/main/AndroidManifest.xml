@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="dev.aerodymeus.aerpclicker">
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
@@ -13,7 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AerpClicker"
         android:localeConfig="@xml/locales_config"
-        android:name=".Notification">
+        android:name=".Notification"
+        tools:targetApi="36">
         <activity
             android:name="dev.aerodymeus.aerpclicker.ui.UI"
             android:exported="true"
@@ -24,7 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        </application>
 
     <queries>
         <!-- Erlaube der App, nach Apps zu suchen, die E-Mails versenden können -->
@@ -35,4 +37,3 @@
     </queries>
 
 </manifest>
-

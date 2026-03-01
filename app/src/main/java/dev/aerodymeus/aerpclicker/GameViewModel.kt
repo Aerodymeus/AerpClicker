@@ -24,8 +24,8 @@ import kotlin.math.roundToInt
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
-//import androidx.privacysandbox.tools.core.generator.build
-import dev.aerodymeus.aerpclicker.Notification.Companion.UPDATE_CHANNEL_ID
+import kotlinx.coroutines.flow.map
+
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -102,7 +102,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private var passiveScoreJob: Job? = null // Job für den passiven Score Generator
 
 
-    // In GameViewModel.kt
     private var lastUiUpdateTime = 0L
     private val uiUpdateInterval = 100L // Millisekunden, z.B. 100ms = 10 UI-Updates pro Sekunde
 
@@ -112,53 +111,43 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     // Datenklasse zur Aufnahme der E-Mail-Daten
     data class FeedbackData(val recipient: String, val subject: String, val body: String)
 
+    // Flow zum Auslesen der gespeicherten Version
+    val lastVersionName: kotlinx.coroutines.flow.Flow<String?> = dataStore.data.map { prefs ->
+        prefs[GameStateKeys.LAST_KNOWN_VERSION_NAME]
+    }
+
 
 
     init {
         // updateDisplayedScore() // Wird jetzt in loadGameData() und handleScoreChangeWithImmediateUpdate() gemacht
         loadGameData() // Lade den Spielstand beim Start
-        checkForAppUpdate()
     }
 
-    private fun checkForAppUpdate() {
+
+    // Funktion zum Speichern der aktuellen Version
+    fun updateSavedVersionName(newName: String) {
         viewModelScope.launch {
-            val prefs = dataStore.data.first()
-            val lastKnownVersionCode = prefs[GameStateKeys.LAST_KNOWN_VERSION_CODE] ?: 0
-            val currentVersionCode = BuildConfig.VERSION_CODE
-
-            if (currentVersionCode > lastKnownVersionCode) {
-                // Ein Update wurde erkannt!
-                showUpdateNotification()
-
-                // Speichere die neue Version, um die Benachrichtigung nicht erneut zu zeigen
-                dataStore.edit { settings ->
-                    settings[GameStateKeys.LAST_KNOWN_VERSION_CODE] = currentVersionCode
-                }
+            dataStore.edit { prefs ->
+                prefs[GameStateKeys.LAST_KNOWN_VERSION_NAME] = newName
             }
         }
     }
 
-    private fun showUpdateNotification() {
-        val context = getApplication<Application>().applicationContext
+    //Die eigentliche Benachrichtigungs-Logik
+    fun showUpdateNotification(context: Context) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        val notification = NotificationCompat.Builder(context, UPDATE_CHANNEL_ID)
-            .setSmallIcon(R.drawable.aerp_button_vektor) // WICHTIG: Erstelle eine kleine, weiße Icon-Datei
-            .setContentTitle(context.getString(R.string.aerp_clicker_update_title))
-            .setContentText(
-                context.getString(
-                    R.string.aerp_clicker_update_desc,
-                    BuildConfig.VERSION_NAME
-                ))
+        // Wir nutzen die CHANNEL_ID aus deiner Notification.kt
+        val notification = NotificationCompat.Builder(context, Notification.CHANNEL_ID)
+            .setSmallIcon(R.drawable.aerp_button_vektor)
+            .setContentTitle("Update erfolgreich!")
+            .setContentText("AerpClicker wurde auf Version ${BuildConfig.VERSION_NAME} aktualisiert.")
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setAutoCancel(true) // Schließt die Benachrichtigung bei Klick
+            .setAutoCancel(true)
             .build()
 
-        // ID 1 ist willkürlich, aber eindeutig für diese Benachrichtigung
-        notificationManager.notify(1, notification)
+        notificationManager.notify(1001, notification)
     }
-
-
 
 
     //GameSave

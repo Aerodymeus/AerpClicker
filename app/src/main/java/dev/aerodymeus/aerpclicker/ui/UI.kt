@@ -94,11 +94,6 @@ import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 import kotlinx.coroutines.launch
 
 
-@Composable
-fun getAppVersion(): String {
-    return BuildConfig.VERSION_NAME
-}
-
 
 enum class ThemeSetting {
     SYSTEM, LIGHT, DARK
@@ -292,7 +287,7 @@ fun OptionsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- Benachrichtigungs-Option ---
+        // --- Benachrichtigung Option ---
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.options_notifications_title)) },
@@ -345,8 +340,7 @@ fun OptionsScreen(
                             gameViewModel.resetGameProgress() // Funktion im ViewModel aufrufen
                             showResetConfirmationDialog = false
                             // Optional: Navigiere zum GameScreen oder zeige eine Toast-Nachricht
-                            // z.B. currentScreen = Screen.Game (wenn du Zugriff auf currentScreen hast)
-                            // oder eine Snackbar anzeigen
+                            // z.B. currentScreen = Screen.Game (wenn du Zugriff auf currentScreen hast) oder eine Snackbar anzeigen
                         }
                     ) {
                         Text(stringResource(R.string.reset_dialog_confirm_button))
@@ -399,7 +393,7 @@ fun OptionsScreen(
 
         // Die App-Version anzeigen
         Text(
-            text = stringResource(R.string.app_version, getAppVersion()),
+            text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Etwas unauffälliger
         )
@@ -418,7 +412,7 @@ fun GameScreen(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    // Box als äußerster com. google. android. gms. tagmanager. Container, um das Hintergrundbild und den Inhalt zu überlagern
+    // Box als äußerster com. google. android. gms. tag-manager. Container, um das Hintergrundbild und den Inhalt zu überlagern
     Box(modifier = modifier.fillMaxSize()) {
         // Prüfen, ob das dunkle Thema aktiv ist
         //val isDarkTheme = isSystemInDarkTheme()
@@ -434,7 +428,7 @@ fun GameScreen(
         )
         // HINTERGRUNDBILD
         Image(
-            painter = painterResource(id = R.drawable.aerp_button), // Dein Bildname hier
+            painter = painterResource(id = R.drawable.aerp_button_bg), // Dein Bildname hier
             contentDescription = stringResource(id = R.string.game_background_image_description), // Füge einen beschreibenden String in strings.xml hinzu
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop, // Oder eine andere ContentScale-Option (Crop ist oft gut für Hintergründe)
@@ -585,8 +579,8 @@ fun ShopMenu(
         val onBuy: () -> Unit,
         val canAfford: Boolean,
         val currentMultiplier: Double? = null,
-        val currentProduction: Double? = null, // Für Produktions-Upgrade
-        val currentProductionBonus: Double? = null, // Für die Beschreibung des Produktions-Upgrades
+        val currentProduction: Double? = null, // Für Productions-Upgrade
+        val currentProductionBonus: Double? = null, // Für die Beschreibung des Productions-Upgrades
         val isActive: Boolean? = null,
         val description: String? = null,
         val requiresBaseItemActive: Boolean? = null,
@@ -745,7 +739,7 @@ fun ShopItem(
     canAfford: Boolean,
     currentMultiplier: Double? = null,
     currentProduction: Double? = null,
-    currentProductionBonus: Double? = null, // Für die Anzeige des Bonus' des Produktionsupgrades
+    currentProductionBonus: Double? = null, // Für die Anzeige des Bonus des Produktionsupgrades
     isActive: Boolean? = null,
     description: String? = null,
     requiresBaseItemActive: Boolean? = null,
@@ -795,13 +789,13 @@ fun ShopItem(
                 fontSize = 14.sp, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 4.dp))
         }
 
-        // Aktuelle Produktion der Fabrik (Basis oder nach Produktions-Upgrade)
+        // Aktuelle Produktion der Fabrik (Basis oder nach Productions-Upgrade)
         if (currentProduction != null && name == stringResource(id = R.string.shop_item_aerp_factory) && isActive == true) {
             val formattedProduction = String.format("%.1f", currentProduction)
             Text(stringResource(id = R.string.shop_item_production_prefix) + " " + formattedProduction + " " + stringResource(id = R.string.shop_item_production_suffix),
                 fontSize = 14.sp, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(bottom = 4.dp))
         }
-        // Anzeige des zusätzlichen Bonus für das Produktions-Upgrade
+        // Anzeige des zusätzlichen Bonus für das Productions-Upgrade
         if (currentProductionBonus != null && name == stringResource(id = R.string.shop_item_factory_production_upgrade) && isActive == true && gameViewModel.factoryProductionUpgradeLevel > 0) {
             val formattedBonus = String.format("%.1f", currentProductionBonus * gameViewModel.factoryProductionUpgradeLevel) // Gesamter Bonus
             Text( stringResource(id = R.string.shop_item_current_bonus_prefix) + " " + "+$formattedBonus" + " " + stringResource(id = R.string.shop_item_production_suffix),
@@ -833,7 +827,7 @@ fun ShopItem(
             stringResource(id = R.string.shop_item_aerp_factory) -> canAfford && isActive == false
             stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade) ->
                 canAfford && gameViewModel.isAutoClickerActive && gameViewModel.autoClickerInterval > gameViewModel.minAutoClickerInterval
-            stringResource(id = R.string.shop_item_factory_production_upgrade) -> // Produktions-Upgrade
+            stringResource(id = R.string.shop_item_factory_production_upgrade) -> // Productions-Upgrade
                 canAfford && gameViewModel.isPassiveScoreGeneratorActive
             stringResource(id = R.string.shop_item_factory_interval_upgrade) -> // NEU: Fabrik Intervall-Upgrade
                 canAfford && gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorInterval > gameViewModel.minPassiveGeneratorInterval
@@ -848,7 +842,7 @@ fun ShopItem(
                 gameViewModel.isAutoClickerActive && gameViewModel.autoClickerInterval <= gameViewModel.minAutoClickerInterval -> stringResource(id = R.string.shop_item_max_level_button)
                 else -> stringResource(id = R.string.shop_item_upgrade_button) + " (${stringResource(id = R.string.shop_item_cost_prefix)}$cost${stringResource(id = R.string.shop_item_cost_suffix)})"
             }
-            stringResource(id = R.string.shop_item_factory_production_upgrade) -> when { // Produktions-Upgrade
+            stringResource(id = R.string.shop_item_factory_production_upgrade) -> when { // Productions-Upgrade
                 requiresBaseItemActive == true && isActive == false -> stringResource(id = R.string.shop_item_buy_button_requires_base)
                 else -> stringResource(id = R.string.shop_item_upgrade_button) + " (${stringResource(id = R.string.shop_item_cost_prefix)}$cost${stringResource(id = R.string.shop_item_cost_suffix)})"
             }
@@ -896,6 +890,9 @@ fun AerpClickerApp(
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) }
     val activity = LocalContext.current as? ComponentActivity
     val context = LocalContext.current
+    val currentVersion = BuildConfig.VERSION_NAME
+    val savedVersion by gameViewModel.lastVersionName.collectAsState(initial = null)
+
 
     // 2. Bestimme, ob der Dark Mode basierend auf der Einstellung verwendet werden soll
     val useDarkTheme = when (currentThemeSetting) {
@@ -927,6 +924,28 @@ fun AerpClickerApp(
         }
     }
 
+    LaunchedEffect(savedVersion) {
+        // Wenn savedVersion null ist, laden wir noch aus dem DataStore
+        if (savedVersion != null) {
+            if (savedVersion != currentVersion) {
+                // Die Versionen unterscheiden sich → Update erkannt!
+
+                // Prüfen, ob wir die Berechtigung haben
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+
+                    gameViewModel.showUpdateNotification(context)
+                }
+
+                // Jetzt die neue Version speichern, damit die Nachricht nur 1x kommt
+                gameViewModel.updateSavedVersionName(currentVersion)
+            }
+        } else {
+            // Erster Start der App überhaupt (oder DataStore leer)
+            // wir speichern die aktuelle Version ohne Nachricht
+            gameViewModel.updateSavedVersionName(currentVersion)
+        }
+    }
 
     // 3. Wende das Theme zentral an. Alles andere ist darin verschachtelt.
     AerpClickerTheme(darkTheme = useDarkTheme) {
