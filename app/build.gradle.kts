@@ -14,7 +14,7 @@ android {
         applicationId = "dev.aerodymeus.aerpclicker"
         minSdk = 30
         targetSdk = 36
-        versionCode = 17
+        versionCode = 16
         versionName = "0.2.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
