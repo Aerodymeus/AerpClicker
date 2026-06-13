@@ -17,6 +17,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -65,6 +70,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,13 +80,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -91,7 +99,61 @@ import dev.aerodymeus.aerpclicker.GameViewModel
 import dev.aerodymeus.aerpclicker.R
 import dev.aerodymeus.aerpclicker.ThemeViewModel
 import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
+import kotlin.math.roundToInt
+
+data class ClickFeedback(val id: Long, val x: Float, val y: Float, val value: Double)
+
+@Composable
+fun ClickFeedbackEffect(feedback: ClickFeedback, onAnimationFinished: () -> Unit) {
+    val animatedY = remember { Animatable(feedback.y) }
+    val animatedAlpha = remember { Animatable(1f) }
+
+    LaunchedEffect(feedback.id) {
+        // Start the upward movement
+        val movement = launch {
+            animatedY.animateTo(
+                targetValue = feedback.y - 150f,
+                animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing)
+            )
+        }
+
+        // Wait for 1 second before starting the fade-out
+        delay(1000)
+
+        // Fade out the text
+        animatedAlpha.animateTo(
+            targetValue = 0f,
+            animationSpec = tween(durationMillis = 800, easing = LinearOutSlowInEasing)
+        )
+
+        // Wait for movement to finish if it hasn't already (though it should be done)
+        movement.join()
+
+        // Notify that the animation is complete so the item can be removed
+        onAnimationFinished()
+    }
+
+    // Format the text to show actual points (with decimals if necessary)
+    val displayText = remember(feedback.value) {
+        if (feedback.value % 1.0 == 0.0) {
+            "+${feedback.value.toInt()}"
+        } else {
+            String.format(Locale.getDefault(), "+%.2f", feedback.value)
+        }
+    }
+
+    Text(
+        text = displayText,
+        color = Color.White,
+        fontSize = 24.sp,
+        modifier = Modifier
+            .offset { IntOffset(feedback.x.toInt() - 20, animatedY.value.toInt()) }
+            .graphicsLayer(alpha = animatedAlpha.value)
+    )
+}
 
 
 
@@ -411,12 +473,26 @@ fun GameScreen(
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val feedbacks = remember { mutableStateListOf<ClickFeedback>() }
 
-    // Box als äußerster com. google. android. gms. tag-manager. Container, um das Hintergrundbild und den Inhalt zu überlagern
-    Box(modifier = modifier.fillMaxSize()) {
-        // Prüfen, ob das dunkle Thema aktiv ist
-        //val isDarkTheme = isSystemInDarkTheme()
-
+    // Box als äußerster Container, um das Hintergrundbild und den Inhalt zu überlagern
+    // jetzt mit pointerInput, damit man überall auf den Bildschirm klicken kann und die Position erhält
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    val newFeedback = ClickFeedback(
+                        id = System.nanoTime(),
+                        x = offset.x,
+                        y = offset.y,
+                        value = gameViewModel.clickMultiplier
+                    )
+                    feedbacks.add(newFeedback)
+                    gameViewModel.onAerpClicked()
+                }
+            }
+    ) {
         // Die Matrix zur Invertierung der Farben
         val invertColorsMatrix = ColorMatrix(
             floatArrayOf(
@@ -428,42 +504,48 @@ fun GameScreen(
         )
         // HINTERGRUNDBILD
         Image(
-            painter = painterResource(id = R.drawable.aerp_button_bg), // Dein Bildname hier
-            contentDescription = stringResource(id = R.string.game_background_image_description), // Füge einen beschreibenden String in strings.xml hinzu
+            painter = painterResource(id = R.drawable.aerp_button_bg),
+            contentDescription = stringResource(id = R.string.game_background_image_description),
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop, // Oder eine andere ContentScale-Option (Crop ist oft gut für Hintergründe)
+            contentScale = ContentScale.Crop,
             colorFilter = if (useDarkTheme) ColorFilter.colorMatrix(invertColorsMatrix) else null
         )
 
+        // Visual Feedbacks Overlay
+        feedbacks.forEach { feedback ->
+            ClickFeedbackEffect(feedback = feedback) {
+                feedbacks.remove(feedback)
+            }
+        }
+
+        // Shop Button
         Button(
-            onClick = onShopButtonClicked, // <<< 2. Den neuen Parameter hier verwenden
+            onClick = onShopButtonClicked,
             modifier = Modifier
-                .align(Alignment.TopEnd) // <<< 3. Richtet den Button oben rechts aus
-                .padding(16.dp), // Fügt etwas Abstand zum Rand hinzu
+                .align(Alignment.TopEnd)
+                .padding(16.dp),
             shape = RoundedCornerShape(50),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.ShoppingCart,
                     contentDescription = null,
-                    //tint = MaterialTheme.colorScheme.primary // Sorgt für gute Sichtbarkeit
                 )
                 Spacer(Modifier.width(4.dp))
 
                 Text(
                     text=stringResource(id = R.string.shop_title).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
-                    //color = MaterialTheme.colorScheme.primary
                 )
             }
         }
 
+        // Settings Button
         Button(
-            onClick = onSettingsButtonClicked, // <<< 2. Den neuen Parameter hier verwenden
+            onClick = onSettingsButtonClicked,
             modifier = Modifier
-                .align(Alignment.TopStart) // <<< 3. Richtet den Button oben links aus
+                .align(Alignment.TopStart)
                 .padding(16.dp),
             shape = RoundedCornerShape(100),
             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
@@ -471,98 +553,84 @@ fun GameScreen(
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = null,
-                //tint = MaterialTheme.colorScheme.primary // Sorgt für gute Sichtbarkeit
             )
         }
-    }
 
-    val mainContent = @Composable {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight() // Füllt die Höhe des ihm zugewiesenen Raums
-        ) {
-            Text(
-                text = stringResource(id = R.string.score_text, gameViewModel.displayedScore),
-                fontSize = 32.sp, // Keep only one fontSize
-                color = Color.White,
+        // Spielinhalt und Cooldowns
+        val mainContent = @Composable {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.score_text, gameViewModel.displayedScore),
+                    fontSize = 32.sp,
+                    color = Color.White,
+                    modifier = Modifier
+                        .background(
+                            Color.Black.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(8.dp)
+                )
+            }
+        }
+
+        val cooldownsContent = @Composable {
+            Column(
                 modifier = Modifier
                     .background(
                         Color.Black.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(4.dp)
-                    ) // Leichter Hintergrund für den Text
-                    .padding(8.dp)
-            )
-
-            Button(
-                onClick = { gameViewModel.onAerpClicked() },
-                modifier = Modifier.size(200.dp)
-
+                    )
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Top
             ) {
-                Text(
-                    text = stringResource(id = R.string.click_me_button),
-                    fontSize = 24.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center // Text zentrieren
-                )
+                if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
+                    val cooldownText = String.format("%.1f", gameViewModel.autoClickerCooldown)
+                    Text(
+                        text = stringResource(id = R.string.cooldown_auto_clicker_prefix) + " " +
+                                cooldownText + stringResource(id = R.string.cooldown_suffix),
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+                if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
+                    val cooldownText = String.format("%.1f", gameViewModel.passiveGeneratorCooldown)
+                    Text(
+                        text = stringResource(id = R.string.cooldown_aerp_factory_prefix) + " " +
+                                cooldownText + stringResource(id = R.string.cooldown_suffix),
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
             }
         }
-    }
 
-    val cooldownsContent = @Composable {
-        Column(
-            modifier = Modifier
-                .background(
-                    Color.Black.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Top
-        ) {
-            if (gameViewModel.isAutoClickerActive && gameViewModel.autoClickerCooldown > 0) {
-                val cooldownText = String.format("%.1f", gameViewModel.autoClickerCooldown)
-                Text(
-                    text = stringResource(id = R.string.cooldown_auto_clicker_prefix) + " " +
-                            cooldownText + stringResource(id = R.string.cooldown_suffix),
-                    fontSize = 16.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 8.dp),
-
-                )
+        if (isLandscape) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
+                Box(modifier = Modifier.wrapContentWidth(Alignment.End)) { cooldownsContent() }
             }
-            if (gameViewModel.isPassiveScoreGeneratorActive && gameViewModel.passiveGeneratorCooldown > 0) {
-                val cooldownText = String.format("%.1f", gameViewModel.passiveGeneratorCooldown) // Formatieren
-                Text(
-                    text = stringResource(id = R.string.cooldown_aerp_factory_prefix) + " " +
-                            cooldownText + stringResource(id = R.string.cooldown_suffix),
-                    fontSize = 16.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
+        } else { // Portrait
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { cooldownsContent() }
             }
-        }
-    }
-
-    if (isLandscape) {
-        Row(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
-            Box(modifier = Modifier.wrapContentWidth(Alignment.End)) { cooldownsContent() }
-        }
-    } else { // Portrait
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) { mainContent() }
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { cooldownsContent() }
         }
     }
 }
@@ -694,7 +762,7 @@ fun ShopMenu(
                 )
             }
 
-            // Etwas Abstand zwischen Icon und Titel
+            // Etwas Abstand zwischen Icon and Titel
             Spacer(modifier = Modifier.width(16.dp))
 
             // 2. Der Titel
@@ -971,7 +1039,7 @@ fun AerpClickerApp(
 
         ModalNavigationDrawer(
             drawerState = drawerState,
-            gesturesEnabled = currentScreen == Screen.Game, // Gesten nur im GameScreen erlauben
+            gesturesEnabled = false, // Wisch-Geste deaktiviert
             drawerContent = {
                 ModalDrawerSheet {
                     ShopMenu(
@@ -1125,7 +1193,3 @@ fun DefaultPreviewLandscape() {
         )
     }
 }
-
-
-
-
