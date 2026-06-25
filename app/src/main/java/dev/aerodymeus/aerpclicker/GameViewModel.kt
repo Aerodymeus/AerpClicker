@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.map
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
-    private val dataStore = getApplication<Application>().applicationContext.gameDataStore
+    private val dataStore = application.gameDataStore
     // UI State
     var internalScore by mutableDoubleStateOf(0.0) // Interner Score als Double
         private set

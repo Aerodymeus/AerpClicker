@@ -13,8 +13,8 @@ android {
         applicationId = "dev.aerodymeus.aerpclicker"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 18
-        versionName = "0.3.11"
+        versionCode = 19
+        versionName = "0.3.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

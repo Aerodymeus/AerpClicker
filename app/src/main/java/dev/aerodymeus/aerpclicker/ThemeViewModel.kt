@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 
 class ThemeViewModel(application: Application) : AndroidViewModel(application) {
-    private val dataStore = getApplication<Application>().applicationContext.gameDataStore
+    private val dataStore = application.gameDataStore
 
     // Flow, um die aktuelle Theme-Einstellung aus DataStore zu lesen
     val currentThemeSetting: StateFlow<ThemeSetting> = dataStore.data

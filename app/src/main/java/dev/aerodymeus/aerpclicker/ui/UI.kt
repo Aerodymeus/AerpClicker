@@ -4,6 +4,7 @@ import android.provider.Settings
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -12,6 +13,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -34,12 +36,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -56,17 +59,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -93,6 +98,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dev.aerodymeus.aerpclicker.BuildConfig
 import dev.aerodymeus.aerpclicker.GameViewModel
@@ -102,7 +110,7 @@ import dev.aerodymeus.aerpclicker.ui.theme.AerpClickerTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
-import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 data class ClickFeedback(val id: Long, val x: Float, val y: Float, val value: Double)
 
@@ -121,7 +129,7 @@ fun ClickFeedbackEffect(feedback: ClickFeedback, onAnimationFinished: () -> Unit
         }
 
         // Wait for 1 second before starting the fade-out
-        delay(1000)
+        delay(1000.milliseconds)
 
         // Fade out the text
         animatedAlpha.animateTo(
@@ -161,6 +169,26 @@ enum class ThemeSetting {
     SYSTEM, LIGHT, DARK
 }
 
+/**
+ * Hilfsfunktion, um die Theme-Einstellung in einen booleschen Wert aufzulösen.
+ */
+@Composable
+fun ThemeSetting.isDark(): Boolean = when (this) {
+    ThemeSetting.LIGHT -> false
+    ThemeSetting.DARK -> true
+    ThemeSetting.SYSTEM -> isSystemInDarkTheme()
+}
+
+/**
+ * Hilfsfunktion, um die Theme-Einstellung in einen Anzeigenamen aufzulösen.
+ */
+@Composable
+fun ThemeSetting.getLabel(): String = when (this) {
+    ThemeSetting.LIGHT -> stringResource(R.string.theme_light)
+    ThemeSetting.DARK -> stringResource(R.string.theme_dark)
+    ThemeSetting.SYSTEM -> stringResource(R.string.theme_system)
+}
+
 sealed class Screen {
     object Game : Screen()
     object Options : Screen()
@@ -178,19 +206,12 @@ class UI : ComponentActivity() {
             // Sammle die Zustände für Sprache und Theme.
             val currentThemeSetting by themeViewModel.currentThemeSetting.collectAsState()
 
-            // Bestimme, ob der Dark Mode verwendet werden soll.
-            val useDarkTheme = when (currentThemeSetting) {
-                ThemeSetting.LIGHT -> false
-                ThemeSetting.DARK -> true
-                ThemeSetting.SYSTEM -> isSystemInDarkTheme()
-            }
-
             // Rufe AerpClickerApp mit den gesammelten Werten auf.
             AerpClickerApp(
                 gameViewModel = gameViewModel,
                 themeViewModel = themeViewModel,
-                darkTheme = useDarkTheme,
-                currentThemeSetting = currentThemeSetting
+                currentThemeSetting = currentThemeSetting,
+                isDarkTheme = currentThemeSetting.isDark()
             )
         }
     }
@@ -204,8 +225,11 @@ fun OptionsScreen(
     gameViewModel: GameViewModel,
     currentThemeSetting: ThemeSetting,
 ) {
-    var showResetConfirmationDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val scrollState = rememberScrollState()
+
+    var showResetConfirmationDialog by remember { mutableStateOf(false) }
     val feedbackData by gameViewModel.feedbackEvent.collectAsState()
 
     // Status der Berechtigung tracken
@@ -222,18 +246,32 @@ fun OptionsScreen(
         )
     }
 
+    // Berechtigungsstatus aktualisieren, wenn die App wieder in den Vordergrund kommt
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    isNotificationEnabled = ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     // Der Launcher für den Dialog
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         isNotificationEnabled = isGranted
-        if (!isGranted) {
-            // Optional: Dem Nutzer sagen, dass er es in den System-Einstellungen ändern muss,
-            // falls er "Nie wieder fragen" geklickt hat.
-        }
     }
 
-    // NEU: LaunchedEffect, der reagiert, wenn feedbackData nicht null ist
+    // LaunchedEffect, der reagiert, wenn feedbackData nicht null ist
     LaunchedEffect(feedbackData) {
         feedbackData?.let { data ->
             val intent = Intent(Intent.ACTION_SENDTO).apply {
@@ -243,17 +281,12 @@ fun OptionsScreen(
                 putExtra(Intent.EXTRA_TEXT, data.body)
             }
 
-            // Sicherstellen, dass eine App existiert, die den Intent verarbeiten kann
             try {
-                if (intent.resolveActivity(context.packageManager) != null) {
-                    context.startActivity(intent)
-                } else {
-                    // WICHTIG: Gib dem Nutzer Feedback, wenn keine E-Mail-App gefunden wurde
-                    Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
-                }
+                // Auf modernen Android-Versionen (API 30+) ist try-catch oft zuverlässiger
+                // als resolveActivity, es sei denn, man definiert <queries> im Manifest.
+                context.startActivity(intent)
             } catch (_: Exception) {
-                // Fange unerwartete Fehler ab
-                Toast.makeText(context, "Could not open email app.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "No email app found.", Toast.LENGTH_SHORT).show()
             } finally {
                 // Setze das Event zurück, damit es nicht erneut ausgelöst wird
                 gameViewModel.onFeedbackEventHandled()
@@ -261,95 +294,76 @@ fun OptionsScreen(
         }
     }
 
+    // Zentraler Bestätigungsdialog für das Zurücksetzen
     if (showResetConfirmationDialog) {
-        ResetConfirmationDialog(onConfirm = {
-            gameViewModel.resetGameProgress() // Assuming you have a reset function in your ViewModel
-            Toast.makeText(context, "Game progress reset.", Toast.LENGTH_SHORT).show()
-        },
+        ResetConfirmationDialog(
+            onConfirm = {
+                gameViewModel.resetGameProgress()
+                showResetConfirmationDialog = false
+                Toast.makeText(context, context.getString(R.string.reset_game_progress_button), Toast.LENGTH_SHORT).show()
+            },
             onDismiss = {
                 showResetConfirmationDialog = false
             }
         )
     }
 
-
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.options_title), // String Ressource erstellen
+            text = stringResource(R.string.options_title),
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 24.dp)
         )
 
-        Text(
-            text = stringResource(R.string.theme_selection_title), // String Ressource erstellen
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
+        // --- Theme Auswahl ---
         var isThemeDropdownExpanded by remember { mutableStateOf(false) }
 
-        // Die Box, die das Textfeld und das Dropdown-Menü zusammenhält
         ExposedDropdownMenuBox(
             expanded = isThemeDropdownExpanded,
             onExpandedChange = { isThemeDropdownExpanded = it },
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Das Textfeld, das die aktuell ausgewählte Option anzeigt
-            TextField(
-                value = when (currentThemeSetting) {
-                    ThemeSetting.LIGHT -> stringResource(R.string.theme_light)
-                    ThemeSetting.DARK -> stringResource(R.string.theme_dark)
-                    ThemeSetting.SYSTEM -> stringResource(R.string.theme_system)
-                },
-                onValueChange = {}, // Leer lassen, da das Feld nur anzeigt
-                readOnly = true,    // Verhindert, dass der Nutzer Text eingibt
+            OutlinedTextField(
+                value = currentThemeSetting.getLabel(),
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(stringResource(R.string.theme_selection_title)) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = isThemeDropdownExpanded)
                 },
-                colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                 modifier = Modifier
-                    .menuAnchor() // Wichtig, um das Menü am Textfeld auszurichten
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth()
             )
 
-            // Das eigentliche Dropdown-Menü, das bei Klick erscheint
             ExposedDropdownMenu(
                 expanded = isThemeDropdownExpanded,
                 onDismissRequest = { isThemeDropdownExpanded = false }
             ) {
-                // Ein Menüpunkt für jede Theme-Einstellung
                 ThemeSetting.entries.forEach { setting ->
                     DropdownMenuItem(
                         text = {
-                            Text(
-                                text = when (setting) {
-                                    ThemeSetting.LIGHT -> stringResource(R.string.theme_light)
-                                    ThemeSetting.DARK -> stringResource(R.string.theme_dark)
-                                    ThemeSetting.SYSTEM -> stringResource(R.string.theme_system)
-                                }
-                            )
+                            Text(text = setting.getLabel())
                         },
                         onClick = {
-                            themeViewModel.setThemeSetting(setting) // Aktion bei Auswahl
-                            isThemeDropdownExpanded = false // Menü schließen
+                            themeViewModel.setThemeSetting(setting)
+                            isThemeDropdownExpanded = false
                         }
                     )
                 }
             }
         }
 
-        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
+        Spacer(Modifier.height(32.dp))
 
-        Text(text = stringResource(R.string.options_title), style = MaterialTheme.typography.headlineMedium)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // --- Benachrichtigung Option ---
+        // --- Benachrichtigungen ---
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ListItem(
                 headlineContent = { Text(stringResource(R.string.options_notifications_title)) },
@@ -359,11 +373,8 @@ fun OptionsScreen(
                         checked = isNotificationEnabled,
                         onCheckedChange = { checked ->
                             if (checked) {
-                                // Wenn der User einschaltet, fragen wir nach der Berechtigung
                                 permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
-                                // Wenn der User ausschaltet, schicken wir ihn in die Einstellungen,
-                                // da Apps sich Berechtigungen nicht selbst entziehen können.
                                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
                                     putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                                 }
@@ -373,91 +384,59 @@ fun OptionsScreen(
                     )
                 }
             )
+            Spacer(Modifier.height(32.dp))
         }
 
-        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
-
+        // --- Spieldaten ---
         Text(
-            text = stringResource(R.string.game_data_title), // Neuer Titel für Spieldaten-Optionen
+            text = stringResource(R.string.game_data_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        OutlinedButton( // Oder Button, je nach gewünschtem Stil
+        OutlinedButton(
             onClick = { showResetConfirmationDialog = true },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.reset_game_progress_button))
         }
 
-        // Bestätigungsdialog für das Zurücksetzen des Spielstands
-        if (showResetConfirmationDialog) {
-            AlertDialog(
-                onDismissRequest = { showResetConfirmationDialog = false },
-                title = { Text(stringResource(R.string.reset_dialog_title)) },
-                text = { Text(stringResource(R.string.reset_dialog_message)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            gameViewModel.resetGameProgress() // Funktion im ViewModel aufrufen
-                            showResetConfirmationDialog = false
-                            // Optional: Navigiere zum GameScreen oder zeige eine Toast-Nachricht
-                            // z.B. currentScreen = Screen.Game (wenn du Zugriff auf currentScreen hast) oder eine Snackbar anzeigen
-                        }
-                    ) {
-                        Text(stringResource(R.string.reset_dialog_confirm_button))
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = { showResetConfirmationDialog = false }
-                    ) {
-                        Text(
-                            text=stringResource(R.string.reset_dialog_dismiss_button),
-                        )
-                    }
-                }
-            )
-        }
+        Spacer(Modifier.height(32.dp))
 
-        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
-
+        // --- Feedback ---
         Text(
-            text = stringResource(R.string.feedback_title), // Neuer Titel für Spieldaten-Optionen
+            text = stringResource(R.string.feedback_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        OutlinedButton( // Oder Button, je nach gewünschtem Stil
+        OutlinedButton(
             onClick = { gameViewModel.onSendFeedbackClicked() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(stringResource(R.string.feedback_button))
         }
 
-        // Hier könntest du weitere Optionen hinzufügen
-            // Spacer(Modifier.height(24.dp))
-            // Text("Weitere Option...")
-        Spacer(Modifier.height(32.dp)) // Abstand hinzufügen
+        Spacer(Modifier.height(32.dp))
 
+        // --- Credits ---
         Text(
-            text=stringResource(R.string.credits_title),
+            text = stringResource(R.string.credits_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(
-            text=stringResource(R.string.credits_text),
+            text = stringResource(R.string.credits_text),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        // Spacer, um die Versionsnummer vom Rest abzuheben.
         Spacer(Modifier.weight(1f))
 
-        // Die App-Version anzeigen
+        // --- Version ---
         Text(
             text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f) // Etwas unauffälliger
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     }
 }
@@ -467,13 +446,25 @@ fun OptionsScreen(
 fun GameScreen(
     modifier: Modifier = Modifier,
     gameViewModel: GameViewModel,
-    useDarkTheme: Boolean,
+    isDarkTheme: Boolean,
     onShopButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     val feedbacks = remember { mutableStateListOf<ClickFeedback>() }
+
+    // Die Matrix zur Invertierung der Farben - nur einmal erstellen
+    val invertColorsMatrix = remember {
+        ColorMatrix(
+            floatArrayOf(
+                -1f, 0f, 0f, 0f, 255f,
+                0f, -1f, 0f, 0f, 255f,
+                0f, 0f, -1f, 0f, 255f,
+                0f, 0f, 0f, 1f, 0f
+            )
+        )
+    }
 
     // Box als äußerster Container, um das Hintergrundbild und den Inhalt zu überlagern
     // jetzt mit pointerInput, damit man überall auf den Bildschirm klicken kann und die Position erhält
@@ -493,22 +484,13 @@ fun GameScreen(
                 }
             }
     ) {
-        // Die Matrix zur Invertierung der Farben
-        val invertColorsMatrix = ColorMatrix(
-            floatArrayOf(
-                -1f,  0f,  0f, 0f, 255f,
-                0f, -1f,  0f, 0f, 255f,
-                0f,  0f, -1f, 0f, 255f,
-                0f,  0f,  0f, 1f,   0f
-            )
-        )
         // HINTERGRUNDBILD
         Image(
             painter = painterResource(id = R.drawable.aerp_button_bg),
             contentDescription = stringResource(id = R.string.game_background_image_description),
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
-            colorFilter = if (useDarkTheme) ColorFilter.colorMatrix(invertColorsMatrix) else null
+            colorFilter = if (isDarkTheme) ColorFilter.colorMatrix(invertColorsMatrix) else null
         )
 
         // Visual Feedbacks Overlay
@@ -945,10 +927,10 @@ fun ShopItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AerpClickerApp(
-    gameViewModel: GameViewModel, // ViewModel wird jetzt übergeben
-    themeViewModel: ThemeViewModel, // ViewModel wird jetzt übergeben
-    currentThemeSetting: ThemeSetting, // Theme-Einstellung wird übergeben
-    darkTheme: Boolean, // Dark-Mode-Einstellung wird übergeben
+    gameViewModel: GameViewModel,
+    themeViewModel: ThemeViewModel,
+    currentThemeSetting: ThemeSetting,
+    isDarkTheme: Boolean, // Umbenannt für bessere Konvention
 ) {
 
     // 1. Hole alle notwendigen Zustände aus den ViewModels
@@ -956,26 +938,18 @@ fun AerpClickerApp(
     val scope = rememberCoroutineScope()
     var showExitDialog by remember { mutableStateOf(false) }
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) }
-    val activity = LocalContext.current as? ComponentActivity
+    val activity = LocalActivity.current as? ComponentActivity
     val context = LocalContext.current
     val currentVersion = BuildConfig.VERSION_NAME
     val savedVersion by gameViewModel.lastVersionName.collectAsState(initial = null)
 
 
-    // 2. Bestimme, ob der Dark Mode basierend auf der Einstellung verwendet werden soll
-    val useDarkTheme = when (currentThemeSetting) {
-        ThemeSetting.LIGHT -> false
-        ThemeSetting.DARK -> true
-        ThemeSetting.SYSTEM -> isSystemInDarkTheme()
-    }
-
-
     // Launcher für die Berechtigung
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        // Hier könntest du den Status optional in einem DataStore speichern
-    }
+        ActivityResultContracts.RequestPermission(), fun(isGranted: Boolean) {
+            // Hier könntest du den Status optional in einem DataStore speichern
+        }
+    )
 
     // NEU: Abfrage beim allerersten Start der App
     LaunchedEffect(Unit) {
@@ -1016,7 +990,7 @@ fun AerpClickerApp(
     }
 
     // 3. Wende das Theme zentral an. Alles andere ist darin verschachtelt.
-    AerpClickerTheme(darkTheme = useDarkTheme) {
+    AerpClickerTheme(darkTheme = isDarkTheme) {
 
         if (showExitDialog) {
             ExitConfirmationDialog(
@@ -1075,7 +1049,7 @@ fun AerpClickerApp(
                     when (currentScreen) {
                         is Screen.Game -> GameScreen(
                             gameViewModel = gameViewModel,
-                            useDarkTheme = useDarkTheme,
+                            isDarkTheme = isDarkTheme,
                             onShopButtonClicked = { scope.launch { drawerState.open() } },
                             onSettingsButtonClicked = {
                                 currentScreen = Screen.Options // This is the fix!
@@ -1157,7 +1131,11 @@ fun DefaultPreviewPortrait() {
         val context = LocalContext.current
         // Versuche, den echten ApplicationContext zu bekommen, wenn möglich
         val previewApplication = context.applicationContext as? Application
-            ?: Application() // Fallback auf eine sehr einfache Instanz, wenn der Cast fehlschlägt
+            ?: object : Application() {
+                override fun getApplicationContext(): Context = this
+                override fun getPackageName(): String = context.packageName
+                override fun getFilesDir(): java.io.File = context.filesDir
+            }
 
         val previewViewModel = GameViewModel(previewApplication)
 
@@ -1173,7 +1151,7 @@ fun DefaultPreviewPortrait() {
             gameViewModel = previewViewModel,
             themeViewModel = ThemeViewModel(previewApplication),
             currentThemeSetting = ThemeSetting.SYSTEM,
-            darkTheme = false
+            isDarkTheme = false
         )
     }
 }
@@ -1184,12 +1162,17 @@ fun DefaultPreviewPortrait() {
 fun DefaultPreviewLandscape() {
     AerpClickerTheme {
         val context = LocalContext.current
-        val previewApplication = context.applicationContext as? Application ?: Application()
+        val previewApplication = context.applicationContext as? Application
+            ?: object : Application() {
+                override fun getApplicationContext(): Context = this
+                override fun getPackageName(): String = context.packageName
+                override fun getFilesDir(): java.io.File = context.filesDir
+            }
         val previewViewModel = GameViewModel(previewApplication)
         AerpClickerApp(gameViewModel = previewViewModel,
             themeViewModel = ThemeViewModel(previewApplication),
             currentThemeSetting = ThemeSetting.SYSTEM,
-            darkTheme = false
+            isDarkTheme = false
         )
     }
 }
