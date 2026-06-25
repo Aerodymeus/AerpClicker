@@ -22,7 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.House
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
@@ -71,10 +72,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,6 +89,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.changedToDown
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -111,6 +115,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.time.Duration.Companion.milliseconds
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 
 data class ClickFeedback(val id: Long, val x: Float, val y: Float, val value: Double)
 
@@ -448,6 +454,7 @@ fun GameScreen(
     gameViewModel: GameViewModel,
     isDarkTheme: Boolean,
     onShopButtonClicked: () -> Unit,
+    onShopBuildingsButtonClicked: () -> Unit,
     onSettingsButtonClicked: () -> Unit,
 ) {
     val configuration = LocalConfiguration.current
@@ -472,15 +479,23 @@ fun GameScreen(
         modifier = modifier
             .fillMaxSize()
             .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    val newFeedback = ClickFeedback(
-                        id = System.nanoTime(),
-                        x = offset.x,
-                        y = offset.y,
-                        value = gameViewModel.clickMultiplier
-                    )
-                    feedbacks.add(newFeedback)
-                    gameViewModel.onAerpClicked()
+                awaitEachGesture {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        event.changes.forEach { change ->
+                            if (change.changedToDown()) {
+                                change.consume()
+                                val newFeedback = ClickFeedback(
+                                    id = System.nanoTime() + change.id.value,
+                                    x = change.position.x,
+                                    y = change.position.y,
+                                    value = gameViewModel.clickMultiplier
+                                )
+                                feedbacks.add(newFeedback)
+                                gameViewModel.onAerpClicked()
+                            }
+                        }
+                    }
                 }
             }
     ) {
@@ -495,8 +510,10 @@ fun GameScreen(
 
         // Visual Feedbacks Overlay
         feedbacks.forEach { feedback ->
-            ClickFeedbackEffect(feedback = feedback) {
-                feedbacks.remove(feedback)
+            key(feedback.id) {
+                ClickFeedbackEffect(feedback = feedback) {
+                    feedbacks.remove(feedback)
+                }
             }
         }
 
@@ -518,6 +535,28 @@ fun GameScreen(
 
                 Text(
                     text=stringResource(id = R.string.shop_title).uppercase(),
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            }
+        }
+
+        Button(
+            onClick = onShopBuildingsButtonClicked,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(horizontal = 16.dp, vertical = 64.dp),
+            shape = RoundedCornerShape(50),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.House,
+                    contentDescription = null,
+                )
+                Spacer(Modifier.width(4.dp))
+
+                Text(
+                    text=stringResource(id = R.string.shop_title_buildings).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
@@ -638,7 +677,7 @@ fun ShopMenu(
         val currentInterval: Double? = null,
     )
 
-    val shopItemsList = listOf(
+    val upgradeItems = listOf(
         ShopItemData(
             name = stringResource(id = R.string.shop_item_click_boost),
             cost = gameViewModel.clickBoostCost,
@@ -647,15 +686,6 @@ fun ShopMenu(
             canAfford = gameViewModel.internalScore >= gameViewModel.clickBoostCost,
             description = stringResource(id = R.string.shop_item_click_boost_description),
             currentLevel = gameViewModel.clickBoostLevel
-        ),
-        ShopItemData(
-            name = stringResource(id = R.string.shop_item_auto_aerper),
-            isActive = gameViewModel.isAutoClickerActive,
-            onBuy = { gameViewModel.buyAutoClickerUpgrade() },
-            canAfford = gameViewModel.internalScore >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive,
-            description = stringResource(id = R.string.shop_item_auto_aerper_description, gameViewModel.autoClickerInterval),
-            cost = gameViewModel.autoClickerCost,
-            currentInterval = gameViewModel.autoClickerInterval
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_auto_clicker_interval_upgrade),
@@ -674,20 +704,6 @@ fun ShopMenu(
             currentLevel = gameViewModel.autoClickerIntervalUpgradeLevel,
             currentInterval = gameViewModel.autoClickerInterval,
             requiresBaseItemActive = !gameViewModel.isAutoClickerActive
-        ),
-        ShopItemData( // Basis Aerp-Fabrik
-            name = stringResource(id = R.string.shop_item_aerp_factory),
-            isActive = gameViewModel.isPassiveScoreGeneratorActive,
-            onBuy = { gameViewModel.buyPassiveScoreGenerator() },
-            canAfford = gameViewModel.internalScore >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
-            description = if (gameViewModel.isPassiveScoreGeneratorActive) {
-                stringResource(id = R.string.shop_item_aerp_factory_description_active, gameViewModel.effectivePassiveScoreAmount)
-            } else {
-                stringResource(id = R.string.shop_item_aerp_factory_description_inactive, gameViewModel.effectivePassiveScoreAmount) // Zeigt Basisproduktion
-            },
-            cost = gameViewModel.passiveScoreGeneratorCost,
-            currentProduction = if (gameViewModel.isPassiveScoreGeneratorActive) gameViewModel.effectivePassiveScoreAmount else null,
-            currentInterval = if (gameViewModel.isPassiveScoreGeneratorActive) gameViewModel.passiveGeneratorInterval else null // Zeige Intervall, wenn aktiv
         ),
         ShopItemData(
             name = stringResource(id = R.string.shop_item_factory_production_upgrade), // Neuer Name
@@ -758,7 +774,7 @@ fun ShopMenu(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            items(shopItemsList) { itemData ->
+            items(upgradeItems) { itemData ->
                 ShopItem(
                     name = itemData.name,
                     cost = itemData.cost,
@@ -778,7 +794,125 @@ fun ShopMenu(
         }
     }
 
+//    ShopMenuContent(
+//        title = stringResource(id = R.string.shop_title),
+//        items = upgradeItems, // Du müsstest die ShopItemData Logik hier nutzen
+//        onCloseClicked = onCloseClicked,
+//        gameViewModel = gameViewModel
+//    )
+
 }
+
+@Composable
+fun BuildingsMenu(
+    gameViewModel: GameViewModel,
+    onCloseClicked: () -> Unit,
+) {
+    data class ShopItemData(
+        val name: String,
+        val cost: Int,
+        val onBuy: () -> Unit,
+        val canAfford: Boolean,
+        val currentMultiplier: Double? = null,
+        val currentProduction: Double? = null, // Für Productions-Upgrade
+        val currentProductionBonus: Double? = null, // Für die Beschreibung des Productions-Upgrades
+        val isActive: Boolean? = null,
+        val description: String? = null,
+        val requiresBaseItemActive: Boolean? = null,
+        val currentLevel: Int? = null,
+        val currentInterval: Double? = null,
+    )
+    // Hier definieren wir nur die "Building" Items
+    val buildingItems = listOf(
+        // ... (Aerp-Fabrik, Factory Production, Factory Interval)
+        ShopItemData( // Basis Aerp-Fabrik
+            name = stringResource(id = R.string.shop_item_aerp_factory),
+            isActive = gameViewModel.isPassiveScoreGeneratorActive,
+            onBuy = { gameViewModel.buyPassiveScoreGenerator() },
+            canAfford = gameViewModel.internalScore >= gameViewModel.passiveScoreGeneratorCost && !gameViewModel.isPassiveScoreGeneratorActive,
+            description = if (gameViewModel.isPassiveScoreGeneratorActive) {
+                stringResource(id = R.string.shop_item_aerp_factory_description_active, gameViewModel.effectivePassiveScoreAmount)
+            } else {
+                stringResource(id = R.string.shop_item_aerp_factory_description_inactive, gameViewModel.effectivePassiveScoreAmount) // Zeigt Basisproduktion
+            },
+            cost = gameViewModel.passiveScoreGeneratorCost,
+            currentProduction = if (gameViewModel.isPassiveScoreGeneratorActive) gameViewModel.effectivePassiveScoreAmount else null,
+            currentInterval = if (gameViewModel.isPassiveScoreGeneratorActive) gameViewModel.passiveGeneratorInterval else null // Zeige Intervall, wenn aktiv
+        ),
+        ShopItemData(
+            name = stringResource(id = R.string.shop_item_auto_aerper),
+            isActive = gameViewModel.isAutoClickerActive,
+            onBuy = { gameViewModel.buyAutoClickerUpgrade() },
+            canAfford = gameViewModel.internalScore >= gameViewModel.autoClickerCost && !gameViewModel.isAutoClickerActive,
+            description = stringResource(id = R.string.shop_item_auto_aerper_description, gameViewModel.autoClickerInterval),
+            cost = gameViewModel.autoClickerCost,
+            currentInterval = gameViewModel.autoClickerInterval
+        )
+    )
+
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp) // Abstand zur Liste darunter
+        ) {
+            // 1. Der Zurück-Button (Icon)
+            IconButton(onClick = onCloseClicked) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Das Standard-Zurück-Icon
+                    contentDescription = stringResource(id = R.string.back_button_description) // Wiederverwendbarer Text für Barrierefreiheit
+                )
+            }
+
+            // Etwas Abstand zwischen Icon and Titel
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // 2. Der Titel
+            Text(
+                text = stringResource(id = R.string.shop_title),
+                style = MaterialTheme.typography.headlineMedium // Passt gut zur TopAppBar
+            )
+
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(buildingItems) { itemData ->
+                ShopItem(
+                    name = itemData.name,
+                    cost = itemData.cost,
+                    onBuy = itemData.onBuy,
+                    canAfford = itemData.canAfford,
+                    currentMultiplier = itemData.currentMultiplier,
+                    currentProduction = itemData.currentProduction,
+                    currentProductionBonus = itemData.currentProductionBonus,
+                    isActive = itemData.isActive,
+                    description = itemData.description,
+                    requiresBaseItemActive = itemData.requiresBaseItemActive,
+                    currentLevel = itemData.currentLevel,
+                    currentInterval = itemData.currentInterval,
+                    gameViewModel = gameViewModel
+                )
+            }
+        }
+    }
+
+
+//    ShopMenuContent(
+//        title = stringResource(id = R.string.shop_title_buildings),
+//        items = buildingItems,
+//        onCloseClicked = onCloseClicked,
+//        gameViewModel = gameViewModel
+//    )
+
+}
+
 
 @SuppressLint("StringFormatMatches", "DefaultLocale")
 @Composable
@@ -933,8 +1067,9 @@ fun AerpClickerApp(
     isDarkTheme: Boolean, // Umbenannt für bessere Konvention
 ) {
 
-    // 1. Hole alle notwendigen Zustände aus den ViewModels
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // 1. Hole alle notwendigen Zustände aus den ViewModel
+    val shopDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val buildingsDrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showExitDialog by remember { mutableStateOf(false) }
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Game) }
@@ -1011,56 +1146,77 @@ fun AerpClickerApp(
 
 
 
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            gesturesEnabled = false, // Wisch-Geste deaktiviert
-            drawerContent = {
-                ModalDrawerSheet {
-                    ShopMenu(
-                        gameViewModel = gameViewModel,
-                        onCloseClicked = { scope.launch { drawerState.close() } }
-                    )
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+            ModalNavigationDrawer(
+                drawerState = buildingsDrawerState,
+                gesturesEnabled = false,
+                drawerContent = {
+                    // Den Inhalt des Drawers wieder auf LTR setzen, damit Text normal aussieht
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                        ModalDrawerSheet {
+                            BuildingsMenu(
+                                gameViewModel = gameViewModel,
+                                onCloseClicked = { scope.launch { buildingsDrawerState.close() } }
+                            )
+                        }
+                    }
                 }
-            }
-        ) {
-            Scaffold(
-                topBar = {
-                    TopAppBar(
-                        title = { Text(text = stringResource(id = R.string.top_bar_title)) },
-                        navigationIcon = {
-                            if (currentScreen == Screen.Options) {
-                                // Zurück-Pfeil im Options-Screen
-                                IconButton(onClick = { currentScreen = Screen.Game }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(R.string.back_button_description)
+            ) {
+                // Den restlichen Inhalt der App wieder auf LTR setzen
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+
+                    // --- LINKER DRAWER (Upgrades) ---
+                    ModalNavigationDrawer(
+                        drawerState = shopDrawerState,
+                        gesturesEnabled = false,
+                        drawerContent = {
+                            ModalDrawerSheet {
+                                ShopMenu(
+                                    gameViewModel = gameViewModel,
+                                    onCloseClicked = { scope.launch { shopDrawerState.close() } }
+                                )
+                            }
+                        }
+                    ) {
+                        Scaffold(
+                            topBar = {
+                                TopAppBar(
+                                    title = { Text(text = stringResource(id = R.string.top_bar_title)) },
+                                    navigationIcon = {
+                                        if (currentScreen == Screen.Options) {
+                                            // Zurück-Pfeil im Options-Screen
+                                            IconButton(onClick = { currentScreen = Screen.Game }) {
+                                                Icon(
+                                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                    contentDescription = stringResource(R.string.back_button_description)
+                                                )
+                                            }
+                                        }
+                                    }
+                                )
+//                                    actions = {
+//
+//                                    }
+                            }
+
+                        ) { paddingValues ->
+                            Box(modifier = Modifier.padding(paddingValues)) {
+                                when (currentScreen) {
+                                    is Screen.Game -> GameScreen(
+                                        gameViewModel = gameViewModel,
+                                        isDarkTheme = isDarkTheme,
+                                        onShopButtonClicked = { scope.launch { shopDrawerState.open() } },
+                                        onShopBuildingsButtonClicked = { scope.launch { buildingsDrawerState.open() } }, // Jetzt verknüpft!
+                                        onSettingsButtonClicked = { currentScreen = Screen.Options }
+                                    )
+                                    is Screen.Options -> OptionsScreen(
+                                        themeViewModel = themeViewModel,
+                                        gameViewModel = gameViewModel,
+                                        currentThemeSetting = currentThemeSetting
                                     )
                                 }
                             }
-                        },
-                        actions = {
-
                         }
-                    )
-                }
-            ) { paddingValues ->
-                // 4. Zeige den korrekten Screen basierend auf dem 'currentScreen'-Zustand
-                Box(modifier = Modifier.padding(paddingValues)) {
-                    when (currentScreen) {
-                        is Screen.Game -> GameScreen(
-                            gameViewModel = gameViewModel,
-                            isDarkTheme = isDarkTheme,
-                            onShopButtonClicked = { scope.launch { drawerState.open() } },
-                            onSettingsButtonClicked = {
-                                currentScreen = Screen.Options // This is the fix!
-                            }
-                        )
-
-                        is Screen.Options -> OptionsScreen(
-                            themeViewModel = themeViewModel,
-                            gameViewModel = gameViewModel,
-                            currentThemeSetting = currentThemeSetting
-                        )
                     }
                 }
             }

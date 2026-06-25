@@ -83,5 +83,6 @@
 
     <string name="options_notifications_title">Push-meldingen</string>
     <string name="options_notifications_desc">Ontvang updates over je AerpClicker!</string>
+    <string name="shop_title_buildings">GEBOUWEN</string>
 
 </resources>

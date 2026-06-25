@@ -83,4 +83,6 @@
 
     <string name="options_notifications_title">Push-ilmoitukset</string>
     <string name="options_notifications_desc">Saat päivityksiä AerpClickeristäsi!</string>
+    <string name="shop_title_buildings">RAKENNUKSET</string>
+
 </resources>

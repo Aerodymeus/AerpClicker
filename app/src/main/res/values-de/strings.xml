@@ -126,5 +126,6 @@
 
     <string name="options_notifications_title">Push-Benachrichtigungen</string>
     <string name="options_notifications_desc">Erhalte Updates über deinen AerpClicker!</string>
+    <string name="shop_title_buildings">GEBÄUDE</string>
 
 </resources>

@@ -104,4 +104,6 @@
 
     <string name="options_notifications_title">Notificaciones push</string>
     <string name="options_notifications_desc">¡Recibe actualizaciones sobre tu AerpClicker!</string>
+    <string name="shop_title_buildings">EDIFICIOS</string>
+
 </resources>
