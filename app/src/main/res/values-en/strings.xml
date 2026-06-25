@@ -111,4 +111,7 @@
     <string name="language_dutch">Dutch</string>
     <string name="language_finnish">Finnish</string>
 
+    <string name="options_notifications_title">Push Notifications</string>
+    <string name="options_notifications_desc">Get updates about your AerpClicker!</string>
+
 </resources>

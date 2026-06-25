@@ -101,4 +101,7 @@
     <string name="language_italian">Italiano</string>
     <string name="language_dutch">Olandese</string>
     <string name="language_finnish">Finlandese</string>
+
+    <string name="options_notifications_title">Notifiche push</string>
+    <string name="options_notifications_desc">Ricevi aggiornamenti sul tuo AerpClicker!</string>
 </resources>

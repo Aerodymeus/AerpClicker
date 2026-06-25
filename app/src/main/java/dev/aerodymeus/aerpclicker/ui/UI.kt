@@ -53,13 +53,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
@@ -300,7 +300,7 @@ fun OptionsScreen(
             onConfirm = {
                 gameViewModel.resetGameProgress()
                 showResetConfirmationDialog = false
-                Toast.makeText(context, context.getString(R.string.reset_game_progress_button), Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, R.string.reset_game_progress_button, Toast.LENGTH_SHORT).show()
             },
             onDismiss = {
                 showResetConfirmationDialog = false
@@ -339,7 +339,7 @@ fun OptionsScreen(
                 },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                 modifier = Modifier
-                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     .fillMaxWidth()
             )
 

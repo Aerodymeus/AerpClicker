@@ -2,57 +2,62 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.google.services)
 }
 
-android {
-    namespace = "dev.aerodymeus.aerpclicker"
-    compileSdk = libs.versions.compileSdk.get().toInt()
+    val javaVersionStr = libs.versions.javaVersion.get()
+    val javaVersion = JavaVersion.toVersion(javaVersionStr)
 
-    defaultConfig {
-        applicationId = "dev.aerodymeus.aerpclicker"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 19
-        versionName = "0.3.12"
+    extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
+        namespace = "dev.aerodymeus.aerpclicker"
+        compileSdk = libs.versions.compileSdk.get().toInt()
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+        defaultConfig {
+            applicationId = "dev.aerodymeus.aerpclicker"
+            minSdk = libs.versions.minSdk.get().toInt()
+            targetSdk = libs.versions.targetSdk.get().toInt()
+            versionCode = libs.versions.versionCode.get().toInt()
+            versionName = libs.versions.versionName.get()
 
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-            ndk {
-                debugSymbolLevel = "FULL"
+            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+
+        buildTypes {
+            release {
+                isMinifyEnabled = true
+                isShrinkResources = true
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+                ndk {
+                    debugSymbolLevel = "FULL"
+                }
+            }
+        }
+
+        compileOptions {
+            sourceCompatibility = javaVersion
+            targetCompatibility = javaVersion
+        }
+
+        buildFeatures {
+            compose = true
+            buildConfig = true
+        }
+
+        packaging {
+            resources {
+                excludes += "/META-INF/{AL2.0,LGPL2.1}"
             }
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-    buildFeatures {
-        compose = true
-        buildConfig = true
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaVersionStr))
         }
     }
-}
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -63,6 +68,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.material.icons.core)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.datastore.preferences)

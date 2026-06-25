@@ -81,4 +81,7 @@
     <string name="language_dutch">Nederlands</string>
     <string name="language_finnish">Fins</string>
 
+    <string name="options_notifications_title">Push-meldingen</string>
+    <string name="options_notifications_desc">Ontvang updates over je AerpClicker!</string>
+
 </resources>

@@ -25,7 +25,7 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.flow.map
-
+import kotlin.time.Duration.Companion.milliseconds
 
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
@@ -56,7 +56,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         private set
     var autoClickerInterval by mutableDoubleStateOf(10.0) // Sekunden, jetzt veränderbar
         private set
-    val minAutoClickerInterval = 0.5 // Minimal erlaubtes Intervall (z.B. 0.5 Sekunden)
+    val minAutoClickerInterval = 0.5 // Minimal erlaubtes Intervall (z.B. 0,5 Sekunden)
     private val autoClickerIntervalReductionPercentage = 0.10 // 10% Reduktion pro Upgrade
     var autoClickerIntervalUpgradeCost by mutableIntStateOf(150) // Startkosten für das Intervall-Upgrade
         private set
@@ -163,7 +163,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             val loadedClickBoostLevel = prefs[GameStateKeys.CLICK_BOOST_LEVEL] ?: 0
             if (loadedClickBoostLevel > 0) {
                 // Setze Level und berechne Multiplikator und Kosten basierend auf diesem Level
-                // Dies vermeidet das Speichern von abgeleiteten Werten
+                // dies vermeidet das Speichern von abgeleiteten Werten
                 var tempClickMultiplier = baseClickValue
                 var tempClickBoostCost = 50 // Startkosten
                 (0 until loadedClickBoostLevel).forEach { _ ->
@@ -296,7 +296,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             // 2. In-Memory Zustände im ViewModel auf Standardwerte zurücksetzen
-            //    Dies ist wichtig, damit die UI sofort den Reset widerspiegelt.
+            //    dies ist wichtig, damit die UI sofort den Reset widerspiegelt.
             //    Die loadGameData() Funktion wird beim nächsten Start die (nicht mehr vorhandenen)
             //    Daten aus DataStore laden und somit die Standardwerte verwenden.
             internalScore = 0.0
@@ -403,7 +403,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
             // Fabrik-Upgrade
-            // Umbenannt zu buyFactoryProductionUpgrade
+            // umbenannt zu buyFactoryProductionUpgrade
             fun buyFactoryProductionUpgrade() {
                 if (internalScore >= factoryProductionUpgradeCost && isPassiveScoreGeneratorActive) {
                     internalScore -= factoryProductionUpgradeCost
@@ -416,7 +416,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
                     // Wenn die Fabrik aktiv ist, starte sie neu, um den aktualisierten Score zu verwenden
                     // (Obwohl die Erhöhung des Scores selbst in startPassiveScoreGenerator geschieht)
-                    // Die Logik in startPassiveScoreGenerator verwendet bereits effectivePassiveScoreAmount.
+                    // die Logik in startPassiveScoreGenerator verwendet bereits effectivePassiveScoreAmount.
                     // Ein expliziter Neustart ist hier nicht unbedingt nötig, wenn nur der Betrag angepasst wird,
                     // da die Schleife in startPassiveScoreGenerator diesen Wert bei jeder Iteration neu liest.
                     // Aber wenn du sichergehen willst, dass alles sofort korrekt ist:
@@ -484,7 +484,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     if (!isAutoClickerActive) break
                     val remainingMillis = delayMillis - timePassedMillis
                     autoClickerCooldown = remainingMillis / 1000.0
-                    delay(minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)))
+                    delay(minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)).milliseconds)
                     timePassedMillis += minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)) // Korrekte Addition
                 }
                 if (!isAutoClickerActive) {
@@ -518,7 +518,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     if (!isPassiveScoreGeneratorActive) break
                     val remainingMillis = delayMillis - timePassedMillis
                     passiveGeneratorCooldown = remainingMillis / 1000.0 // Cooldown als Double
-                    delay(minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)))
+                    delay(minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)).milliseconds)
                     timePassedMillis += minOf(uiUpdateRate, remainingMillis.coerceAtLeast(0)) // Korrekte Addition
                 }
 
@@ -564,7 +564,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
 
     override fun onCleared() {
-        super.onCleared()
         autoClickJob?.cancel()
         passiveScoreJob?.cancel() // Den neuen Job ebenfalls aufräumen
         saveGameData() // Daten speichern

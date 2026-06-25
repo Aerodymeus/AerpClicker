@@ -124,5 +124,7 @@
     <string name="language_dutch">Niederländisch</string>
     <string name="language_finnish">Finnisch</string>
 
+    <string name="options_notifications_title">Push-Benachrichtigungen</string>
+    <string name="options_notifications_desc">Erhalte Updates über deinen AerpClicker!</string>
 
 </resources>

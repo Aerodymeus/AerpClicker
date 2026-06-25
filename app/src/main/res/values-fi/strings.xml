@@ -80,4 +80,7 @@
     <string name="language_italian">Italia</string>
     <string name="language_dutch">Hollanti</string>
     <string name="language_finnish">Suomi</string>
+
+    <string name="options_notifications_title">Push-ilmoitukset</string>
+    <string name="options_notifications_desc">Saat päivityksiä AerpClickeristäsi!</string>
 </resources>
