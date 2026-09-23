@@ -1,25 +1,24 @@
 <resources>
     <string name="app_name" translatable="false">Aerp Clicker</string>
     <string name="get_aerps_text">Bekomme Aerps!</string>
-    <string name="duplicate_aerps_label">Doppelte Aerps</string> <!-- Für den App-Titel in der Manifest-Datei und ggf. anderswo -->
+    <string name="duplicate_aerps_label">Doppelte Aerps</string>
 
     <!-- UI.kt - AerpClickerApp -->
     <string name="top_bar_title" translatable="false">Aerp Clicker</string>
     <string name="menu_content_description">Menü öffnen</string>
 
     <!-- UI.kt - GameScreen -->
-    <string name="score_text" translatable="false">Aerps: %1$d</string> <!-- Prefix für den Punktestand -->
+    <string name="score_text" translatable="false">Aerps: %1$d</string>
     <string name="click_me_button">Bekomme Aerps!</string>
     <string name="cooldown_auto_clicker_prefix">Auto-Klicker: </string>
     <string name="cooldown_aerp_factory_prefix">Aerp-Fabrik: </string>
-    <string name="cooldown_suffix" translatable="false">s</string> <!-- Suffix für Sekunden -->
+    <string name="cooldown_suffix" translatable="false">s</string>
     <string name="game_background_image_description">Hintergrundbild zeigt einen Wolf, der einen Knopf drückt</string>
 
     <!-- UI.kt - ShopMenu -->
     <string name="shop_title">Verbesserungen</string>
     <string name="shop_item_double_aerps">Doppelte Aerps</string>
     <string name="shop_item_auto_aerper">Auto-Aerper</string>
-
 
     <!-- UI.kt - ShopItem -->
     <string name="shop_item_cost_prefix">Kosten: </string>
@@ -28,63 +27,48 @@
     <string name="shop_item_status_inactive">Inaktiv</string>
     <string name="shop_item_buy_button">Kaufen</string>
     <string name="shop_item_bought_button">Gekauft</string>
-#
-    <!-- die Aerp-Fabrik -->
+
+    <!-- Die Aerp-Fabrik -->
     <string name="shop_item_aerp_factory">Aerp-Fabrik</string>
     <string name="shop_item_aerp_factory_description_active">Die Fabrik produziert jetzt zusätzliche Aerps!</string>
     <string name="shop_item_aerp_factory_description_inactive">Kauft eine Fabrik, die %.1f Aerps pro Zyklus produziert.</string>
 
-    <!-- Für das Fabrik-Upgrade Item -->
     <string name="shop_item_factory_upgrade">Fabrik-Booster</string>
     <string name="shop_item_factory_upgrade_description_active">"Die Fabrik produziert jetzt zusätzliche Aerps!     "</string>
     <string name="shop_item_factory_upgrade_description_available">Erhöht die Produktion deiner Fabrik um weitere 5 Aerps pro Zyklus.</string>
-    <string name="shop_item_factory_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik, um diesen Booster zu kaufen.</string>
-    <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string> <!-- Optional, für den Button-Text -->
-
-    <!-- Für die Anzeige der Produktion der Fabrik -->
+    <string name="shop_item_factory_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik.</string>
+    <string name="shop_item_buy_button_requires_base">Kaufen (Benötigt Basis-Item)</string>
 
     <string name="shop_item_production_suffix"> Aerps/Zyklus</string>
-
-    <!-- Für den Hinweis, dass ein Basis-Item benötigt wird -->
     <string name="shop_item_requires_base_prefix">Benötigt: </string>
     <string name="shop_item_requires_base_suffix" translatable="false"> </string>
-
-   <!-- ... andere Strings ... -->
 
     <!-- Beschreibungen für Shop-Items -->
     <string name="shop_item_double_aerps_description">"Verdoppelt die Anzahl der Aerps, die du pro Klick erhältst.     "</string>
     <string name="shop_item_auto_aerper_description">Klickt automatisch alle %.1f Sekunden für dich.</string>
-    <!-- ... alle anderen strings ... -->
 
     <!-- NEUE STRINGS FÜR MEHRFACHEN KAUF -->
     <string name="shop_item_level_prefix">"Stufe: "</string>
     <string name="shop_item_upgrade_button">Verbessern</string>
-    <!-- ... andere Strings ... -->
 
     <!-- Für das Klick-Upgrade (vorher "Doppelte Aerps") -->
-    <string name="shop_item_click_boost">Aerp-Verstärker</string> <!-- NEUER NAME -->
+    <string name="shop_item_click_boost">Aerp-Verstärker</string>
     <string name="shop_item_click_boost_description">Erhöht die Aerps pro Klick um 20%.</string>
-    <!-- ... andere Strings ... -->
+
     <string name="shop_item_auto_clicker_interval_upgrade">Schneller Klicker</string>
-    <string name="shop_item_auto_clicker_interval_upgrade_description">"Reduziert das Auto-Klicker Intervall um 10%%. Aktuell: %.1fs "</string>
-    <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximale
-        Geschwindigkeit erreicht (%.1fs)!
-    </string>
-    <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Benötigt aktiven
-        Auto-Klicker.
-    </string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description">Reduziert das Auto-Klicker Intervall um 10%%. Aktuell: %.1fs </string>
+    <string name="shop_item_auto_clicker_interval_upgrade_description_max_reached">Maximale Geschwindigkeit erreicht (%.1fs)!</string>
+    <string name="shop_item_auto_clicker_interval_upgrade_requires_auto_clicker">Benötigt aktiven Auto-Klicker.</string>
 
     <string name="shop_item_current_interval_prefix">Aktuelles Intervall: </string>
     <string name="shop_item_current_interval_suffix" translatable="false">s</string>
     <string name="shop_item_max_level_button">Max. Level</string>
-    <!-- Stelle sicher, dass shop_item_multiplier_prefix und shop_item_production_prefix nur Text sind,
-             da die Formatierung in UI.kt erfolgt -->
-    <string name="shop_item_multiplier_prefix">Aktueller Bonus: </string> <!-- Beispiel: x%.2f wäre falsch, wenn die Zahl in UI.kt formatiert wird -->
+    <string name="shop_item_multiplier_prefix">Aktueller Bonus: </string>
     <string name="shop_item_production_prefix">Produktion: </string>
 
-    <string name="shop_item_factory_production_upgrade">Produktions-Boost</string> <!-- NEUER NAME oder anpassen -->
-    <string name="shop_item_factory_production_upgrade_description_active">Die Fabrik produziert jetzt zusätzliche %.1f Aerps!</string> <!-- Platzhalter für Bonus -->
-    <string name="shop_item_factory_production_upgrade_description_available">Erhöht die Produktion deiner Fabrik um weitere %.1f Aerps pro Zyklus.</string> <!-- Platzhalter für Bonus -->
+    <string name="shop_item_factory_production_upgrade">Produktions-Boost</string>
+    <string name="shop_item_factory_production_upgrade_description_active">Die Fabrik produziert jetzt zusätzliche %.1f Aerps!</string>
+    <string name="shop_item_factory_production_upgrade_description_available">Erhöht die Produktion deiner Fabrik um weitere %.1f Aerps pro Zyklus.</string>
     <string name="shop_item_factory_production_upgrade_description_requires_factory">Du benötigst zuerst eine Aerp-Fabrik.</string>
 
     <string name="shop_item_factory_interval_upgrade">Schnellere Fabrik</string>
@@ -94,21 +78,51 @@
 
     <string name="shop_item_current_bonus_prefix">Aktueller Gesamtbonus: </string>
 
+    <!-- Building Upgrades - Auto-Aerper -->
+    <string name="shop_item_auto_aerper_tier_1_name">Plastik-Finger</string>
+    <string name="shop_item_auto_aerper_tier_1_desc">Auto-Aerper Geschwindigkeit +50%%</string>
+    <string name="shop_item_auto_aerper_tier_2_name">Ergonomische Maus</string>
+    <string name="shop_item_auto_aerper_tier_2_desc">Auto-Aerper Ertrag x2</string>
+    <string name="shop_item_auto_aerper_tier_3_name">Makro-Bot Script</string>
+    <string name="shop_item_auto_aerper_tier_3_desc">Auto-Clicks profitieren zu 20%% vom manuellen Klick-Multiplikator</string>
+    <string name="shop_item_auto_aerper_tier_4_name">Quanten-Tapper</string>
+    <string name="shop_item_auto_aerper_tier_4_desc">Auto-Aerper Ertrag x2 &amp; Intervall minimal reduziert</string>
+    <string name="shop_item_auto_aerper_tier_5_name">Neuronale Klick-KI</string>
+    <string name="shop_item_auto_aerper_tier_5_desc">Auto-Aerper Ertrag x3</string>
+
+    <!-- Building Upgrades - Aerp-Fabrik -->
+    <string name="shop_item_factory_tier_1_name">Dampfantrieb</string>
+    <string name="shop_item_factory_tier_1_desc">Fabrik-Basisproduktion x2</string>
+    <string name="shop_item_factory_tier_2_name">Fließband-Automatisierung</string>
+    <string name="shop_item_factory_tier_2_desc">Fabrik-Basisproduktion x2</string>
+    <string name="shop_item_factory_tier_3_name">KI-Fabrikleiter</string>
+    <string name="shop_item_factory_tier_3_desc">Fabrik-Basisproduktion x2</string>
+    <string name="shop_item_factory_tier_4_name">Indust리ële Revolution 4.0</string>
+    <string name="shop_item_factory_tier_4_desc">Fabrik-Basisproduktion x3</string>
+    <string name="shop_item_factory_tier_5_name">Antimaterie-Reaktor</string>
+    <string name="shop_item_factory_tier_5_desc">Fabrik-Basisproduktion x5</string>
+
+    <!-- Building Upgrades - Synergie -->
+    <string name="shop_item_synergy_fab_clicks_name">Fabrikations-Klicks</string>
+    <string name="shop_item_synergy_fab_clicks_desc">Jeder Fabrik-Upgrade-Level erhöht die Klick-Stärke des Auto-Aerper um +5%%</string>
+
     <string name="exit_dialog_title">App beenden?</string>
     <string name="exit_dialog_text">Möchtest du Aerp Clicker wirklich beenden?</string>
     <string name="exit_dialog_confirm_button">Beenden</string>
     <string name="exit_dialog_dismiss_button">Abbrechen</string>
-<!-- In res/values/strings.xml (und values-en/strings.xml) -->
+
+    <!-- In res/values/strings.xml (und values-en/strings.xml) -->
     <string name="options_title">Einstellungen</string>
     <string name="theme_selection_title">App-Design</string>
     <string name="theme_light">Hell</string>
     <string name="theme_dark">Dunkel</string>
     <string name="theme_system">Systemstandard</string>
     <string name="back_button_description">Zurück</string>
-<!-- In res/values/strings.xml (und values-en/strings.xml) -->
+
+    <!-- In res/values/strings.xml (und values-en/strings.xml) -->
     <string name="game_data_title">Spieldaten</string>
     <string name="reset_game_progress_button">Spielstand zurücksetzen</string>
-    <string name="reset_dialog_title">Spielstand zurücksetzen?</string>
+    <string name="reset_dialog_title">Reset Spielstand?</string>
     <string name="reset_dialog_message">Möchtest du deinen gesamten Spielfortschritt wirklich unwiderruflich löschen? Alle Aerps und Upgrades gehen verloren.</string>
     <string name="reset_dialog_confirm_button">Zurücksetzen</string>
     <string name="reset_dialog_dismiss_button">Abbrechen</string>
@@ -126,12 +140,10 @@
     <string name="language_spanish">Spanisch</string>
     <string name="language_french">Französisch</string>
     <string name="language_italian">Italienisch</string>
-    <string name="language_dutch">Niederländisch</string>
+    <string name="language_dutch">Niederlandisch</string>
     <string name="language_finnish">Finnisch</string>
 
     <string name="options_notifications_title">Push-Benachrichtigungen</string>
     <string name="options_notifications_desc">Erhalte Updates über deinen AerpClicker!</string>
     <string name="shop_title_buildings">GEBÄUDE</string>
-
-
 </resources>

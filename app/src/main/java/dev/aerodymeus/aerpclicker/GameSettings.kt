@@ -1,4 +1,4 @@
-package dev.aerodymeus.aerpclicker // Oder dein korrektes Paket
+package dev.aerodymeus.aerpclicker
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -16,23 +16,19 @@ object GameStateKeys {
     val INTERNAL_SCORE = doublePreferencesKey("internal_score")
 
     val CLICK_BOOST_LEVEL = intPreferencesKey("click_boost_level")
-    // clickMultiplier und clickBoostCost werden vom Level abgeleitet
 
-    val IS_AUTO_CLICKER_BOUGHT = booleanPreferencesKey("is_auto_clicker_bought") // Um den Kauf des Basis-Items zu speichern
+    val IS_AUTO_CLICKER_BOUGHT = booleanPreferencesKey("is_auto_clicker_bought")
     val AUTO_CLICKER_INTERVAL_UPGRADE_LEVEL = intPreferencesKey("auto_clicker_interval_upgrade_level")
-    // autoClickerCost und autoClickerIntervalUpgradeCost werden vom Level/Kaufstatus abgeleitet
-    // autoClickerInterval wird vom autoClickerIntervalUpgradeLevel abgeleitet
 
     val IS_PASSIVE_GENERATOR_BOUGHT = booleanPreferencesKey("is_passive_generator_bought")
     val FACTORY_PRODUCTION_UPGRADE_LEVEL = intPreferencesKey("factory_production_upgrade_level")
     val FACTORY_INTERVAL_UPGRADE_LEVEL = intPreferencesKey("factory_interval_upgrade_level")
-    // passiveScoreGeneratorCost, factoryProductionUpgradeCost, factoryIntervalUpgradeCost werden abgeleitet
-    // effectivePassiveScoreAmount und passiveGeneratorInterval werden von ihren Leveln abgeleitet
 
     val LAST_KNOWN_VERSION_NAME = stringPreferencesKey("last_known_version_name")
+    val PURCHASED_UPGRADES = stringPreferencesKey("purchased_upgrades")
 }
 
 object AppThemeKeys {
     val SELECTED_THEME =
-        stringPreferencesKey("selected_theme") // Speichert "LIGHT", "DARK", oder "SYSTEM"
+        stringPreferencesKey("selected_theme")
 }

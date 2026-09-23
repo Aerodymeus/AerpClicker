@@ -95,7 +95,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         private set
     //Definiere den Spezialbonus und das Intervall
     private val specialBonusAmount = 200.0 // Der extra Bonus
-    private val specialBonusLevelInterval = 5 // Alle wie viele Level gibt es den Spezialbonus
+    private val specialBonusLevelInterval = 10 // NEU: Das Intervall für den Spezialbonus (z.B. alle 10 Level)
+    // --- NEW BUILDING UPGRADES ---
+    var purchasedUpgrades = mutableStateOf(setOf<String>())
+        private set
+    var manualClickMultiplierBonus by mutableDoubleStateOf(0.0)
+        private set
 
 
     private var autoClickJob: Job? = null
@@ -253,11 +258,49 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 factoryIntervalUpgradeCost = 250
             }
 
+            // --- Load Building Upgrades ---
+            val purchasedIdsRaw = preferences[GameStateKeys.PURCHASED_UPGRADES] ?: ""
+            val purchasedIdsSet = if (purchasedIdsRaw.isNotEmpty()) {
+                purchasedIdsRaw.split(",").toSet()
+            } else {
+                emptySet()
+            }
+            purchasedUpgrades = mutableStateOf(purchasedIdsSet)
+
+            // Calculate bonuses from upgrades
+            var totalMultiplierBonus = 1.0
+            var totalSpeedMultiplier = 1.0
+            var totalManualMultiplierBonus = 0.0
+
+            UpgradeData.upgrades.forEach { upgrade ->
+                if (purchasedIdsSet.contains(upgrade.id)) {
+                    if (upgrade.multiplierBonus != 1.0) {
+                        // Simple multiplicative bonus for now
+                        totalMultiplierBonus *= upgrade.multiplierBonus
+                    }
+                    totalSpeedMultiplier *= upgrade.speedMultiplier
+                    totalManualMultiplierBonus += upgrade.manualMultiplierBonus
+                }
+            }
+
+            // Apply bonuses
+            effectivePassiveScoreAmount = basePassiveScoreAmount * totalMultiplierBonus
+            // Apply speed multipliers to base intervals
+            val basePassiveInterval = 10.0
+            passiveGeneratorInterval = max(minPassiveGeneratorInterval, basePassiveInterval / totalSpeedMultiplier)
+            
+            val baseAutoInterval = 10.0
+            autoClickerInterval = max(minAutoClickerInterval, baseAutoInterval / totalSpeedMultiplier)
+            
+            manualClickMultiplierBonus = totalManualMultiplierBonus
+
             if (isPassiveScoreGeneratorActive) { // Nur starten, wenn Basis gekauft
                 //updateEffectivePassiveScoreAmount() // Stelle sicher, dass der Wert aktuell ist
                 startPassiveScoreGenerator()
             }
             handleScoreChangeWithImmediateUpdate() // UI final aktualisieren
+        }
+    }
         }
     }
 
